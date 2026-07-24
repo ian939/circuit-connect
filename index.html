@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>전류 잇기 · 충전 대기 미니게임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12112A; --panel:#1E1D3D; --slot:#26254A; --line:#302F58;
+    --cyan:#41E6E0; --cyan-dim:#2CB6B2; --amber:#FFB84D;
+    --ink:#ECECFF; --muted:#8785BE; --muted2:#5F5D95;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:radial-gradient(120% 80% at 50% -10%, #201E44 0%, var(--bg) 55%, #0D0C20 100%);
+    color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100dvh;padding:16px 14px 30px;overflow-x:hidden;
+  }
+  .app{width:100%;max-width:440px;}
+
+  .brand{display:flex;align-items:center;gap:10px;margin:2px 2px 14px;}
+  .plug{width:34px;height:34px;border-radius:10px;flex:none;
+    background:linear-gradient(145deg,#2A2A55,#15142E);border:1px solid var(--line);
+    display:grid;place-items:center;box-shadow:0 0 0 1px #0004,0 6px 16px #0006;}
+  .plug svg{width:19px;height:19px;}
+  .brand h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0;line-height:1;}
+  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:4px;font-family:"IBM Plex Mono",monospace;}
+
+  .readout{background:linear-gradient(180deg,var(--panel),#171633);border:1px solid var(--line);
+    border-radius:16px;padding:13px 15px 15px;margin-bottom:12px;
+    box-shadow:inset 0 1px 0 #ffffff10,0 8px 22px #0005;}
+  .meter-top{display:flex;justify-content:space-between;align-items:baseline;font-family:"IBM Plex Mono",monospace;}
+  .meter-top .lab{font-size:10.5px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;}
+  .meter-top .goal{font-size:13px;color:var(--cyan);font-weight:600;}
+  .meter-top .goal b{color:var(--ink);}
+  .bar{height:12px;border-radius:8px;background:var(--slot);margin-top:9px;overflow:hidden;border:1px solid #00000030;}
+  .bar>i{display:block;height:100%;width:0%;border-radius:8px;
+    background:linear-gradient(90deg,var(--cyan-dim),var(--cyan) 70%,#B9FFFB);
+    box-shadow:0 0 14px var(--cyan);transition:width .3s cubic-bezier(.2,.7,.2,1);}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .stat{background:#00000026;border:1px solid #ffffff0d;border-radius:11px;padding:8px 9px;}
+  .stat .k{font-size:9.5px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;}
+  .stat .v{font-size:19px;font-weight:700;margin-top:2px;font-family:"IBM Plex Mono",monospace;line-height:1;}
+  .stat.pt .v{color:var(--amber);}
+  .stat.pt .v small{font-size:11px;font-weight:600;}
+
+  .board-wrap{position:relative;}
+  .board{position:relative;width:100%;aspect-ratio:1/1;display:grid;gap:5px;padding:8px;
+    background:linear-gradient(180deg,#201F42,#16152E);border:1px solid var(--line);border-radius:20px;
+    touch-action:none;user-select:none;box-shadow:inset 0 2px 10px #0006,0 14px 40px #0007;}
+  .cell{position:relative;border-radius:9px;background:#22214333;box-shadow:inset 0 0 0 1px #ffffff08;}
+  .core{position:absolute;left:35%;top:35%;width:30%;height:30%;border-radius:4px;z-index:2;}
+  .core.done{filter:brightness(1.15);}
+  .arm{position:absolute;z-index:1;}
+  .arm.u{left:35%;top:0;width:30%;height:52%;}
+  .arm.d{left:35%;top:48%;width:30%;height:52%;}
+  .arm.l{left:0;top:35%;width:52%;height:30%;}
+  .arm.r{left:48%;top:35%;width:52%;height:30%;}
+  .term{position:absolute;left:15%;top:15%;width:70%;height:70%;border-radius:50%;z-index:3;
+    box-shadow:inset 0 2px 5px #00000055,0 0 0 3px #ffffff14;}
+  .term.done{animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
+
+  .controls{display:flex;gap:9px;margin-top:14px;}
+  .btn{flex:1;border:1px solid var(--line);border-radius:13px;
+    background:linear-gradient(180deg,#242348,#1A1936);color:var(--ink);
+    font-family:inherit;font-size:14px;font-weight:600;padding:12px;cursor:pointer;
+    transition:transform .08s,border-color .15s;}
+  .btn:hover{border-color:var(--cyan-dim);}
+  .btn:active{transform:scale(.97);}
+  .btn svg{vertical-align:-3px;margin-right:6px;width:15px;height:15px;}
+  .hint{text-align:center;color:var(--muted2);font-size:11.5px;margin-top:11px;
+    font-family:"IBM Plex Mono",monospace;letter-spacing:.03em;}
+
+  .overlay{position:absolute;inset:0;border-radius:20px;background:rgba(12,11,30,.82);
+    backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:22px;z-index:10;}
+  .overlay.show{display:flex;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .overlay .big{font-size:15px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);font-family:"IBM Plex Mono",monospace;}
+  .overlay .headline{font-size:32px;font-weight:700;margin:8px 0 4px;letter-spacing:-.02em;}
+  .overlay .reward{margin:14px 0 6px;font-family:"IBM Plex Mono",monospace;font-size:40px;font-weight:700;
+    color:var(--amber);text-shadow:0 0 26px #FFB84D66;}
+  .overlay .reward .p{font-size:20px;}
+  .overlay .desc{color:var(--muted);font-size:13px;max-width:250px;line-height:1.5;margin-bottom:20px;}
+  .overlay .o-btns{display:flex;gap:10px;width:100%;max-width:300px;}
+  .overlay .btn.primary{background:linear-gradient(180deg,var(--cyan),var(--cyan-dim));color:#062322;
+    border-color:transparent;font-weight:700;box-shadow:0 8px 22px #41E6E055;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <div class="plug">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="#41E6E0" stroke-width="1.7" stroke-linejoin="round"/></svg>
+    </div>
+    <div><h1>전류 잇기</h1><div class="sub">Connect · Fill · Charge</div></div>
+  </div>
+
+  <div class="readout">
+    <div class="meter-top">
+      <span class="lab">회로 완성도</span>
+      <span class="goal"><b id="conn">0</b> / <span id="total">0</span> 회로 연결</span>
+    </div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Stage</div><div class="v" id="stage">1</div></div>
+      <div class="stat"><div class="k">채움</div><div class="v" id="fill">0<small style="font-size:11px">%</small></div></div>
+      <div class="stat pt"><div class="k">적립 포인트</div><div class="v" id="points">0<small>P</small></div></div>
+    </div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board" id="board">
+      <div class="overlay" id="overlay">
+        <div class="big">회로 완성</div>
+        <div class="headline" id="o-head">STAGE 1 CLEAR</div>
+        <div class="reward" id="o-reward">+60<span class="p">P</span></div>
+        <div class="desc" id="o-desc">모든 회로가 연결됐어요. 충전 포인트가 적립됐습니다.</div>
+        <div class="o-btns">
+          <button class="btn" id="o-restart">처음부터</button>
+          <button class="btn primary" id="o-next">다음 스테이지</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="clear">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      지우기
+    </button>
+    <button class="btn" id="newp">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 1 0-.9 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      새 판
+    </button>
+  </div>
+  <div class="hint">같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const PAL=['#41E6E0','#FFB020','#FF4D8D','#4ED964','#9B7BFF','#FF7A3D','#4D8BFF','#FF5252'];
+  const board=document.getElementById('board');
+
+  let W,H,N, cellColor, endpointOf, colorPaths, colorDone, numColors;
+  let cellEls=[], stage=1, points=0;
+  let drawing=false, active=-1;
+
+  /* ---------- 레벨 생성기 : 항상 정답이 존재 (해밀턴 경로를 잘라 색 배정) ---------- */
+  function neighbors(cell){
+    const r=(cell/W)|0, c=cell%W, out=[];
+    if(r>0) out.push(cell-W); if(r<H-1) out.push(cell+W);
+    if(c>0) out.push(cell-1); if(c<W-1) out.push(cell+1);
+    return out;
+  }
+  function genPuzzle(size,colors){
+    W=H=size; N=W*H;
+    // 1) 지그재그 해밀턴 경로
+    let path=[];
+    for(let r=0;r<H;r++){
+      if(r%2===0) for(let c=0;c<W;c++) path.push(r*W+c);
+      else for(let c=W-1;c>=0;c--) path.push(r*W+c);
+    }
+    // 2) backbite 로 무작위화 (해밀턴 유지)
+    const posIdx=new Int32Array(N);
+    for(let i=0;i<N;i++) posIdx[path[i]]=i;
+    const iters=N*22;
+    for(let it=0;it<iters;it++){
+      if(Math.random()<0.5){ path.reverse(); for(let i=0;i<N;i++) posIdx[path[i]]=i; }
+      const u=path[N-1], nb=neighbors(u);
+      const w=nb[(Math.random()*nb.length)|0];
+      if(w===path[N-2]) continue;
+      const i=posIdx[w];
+      let lo=i+1, hi=N-1;
+      while(lo<hi){ const t=path[lo];path[lo]=path[hi];path[hi]=t;lo++;hi--; }
+      for(let k=i+1;k<N;k++) posIdx[path[k]]=k;
+    }
+    // 3) 색 개수만큼 조각내기 (각 조각 길이 >= 2)
+    numColors=Math.min(colors, PAL.length, Math.floor(N/2));
+    const base=Math.floor(N/numColors), rem=N%numColors, sizes=[];
+    for(let i=0;i<numColors;i++) sizes.push(base+(i<rem?1:0));
+    for(let s=0;s<numColors*3;s++){
+      const i=(Math.random()*numColors)|0, j=(Math.random()*numColors)|0;
+      if(i!==j && sizes[i]>2){ sizes[i]--; sizes[j]++; }
+    }
+    // 4) 상태 초기화 + 단자 배치
+    cellColor=new Int32Array(N).fill(-1);
+    endpointOf=new Int32Array(N).fill(-1);
+    colorPaths=[]; colorDone=[];
+    let idx=0;
+    for(let ci=0;ci<numColors;ci++){
+      const len=sizes[ci];
+      endpointOf[path[idx]]=ci;
+      endpointOf[path[idx+len-1]]=ci;
+      colorPaths.push([]); colorDone.push(false);
+      idx+=len;
+    }
+    buildBoard();
+    render(); updateHud();
+  }
+
+  function buildBoard(){
+    board.style.gridTemplateColumns=`repeat(${W},1fr)`;
+    board.style.gridTemplateRows=`repeat(${H},1fr)`;
+    // overlay 는 유지, cell 만 재생성
+    board.querySelectorAll('.cell').forEach(e=>e.remove());
+    cellEls=[];
+    for(let i=0;i<N;i++){
+      const d=document.createElement('div');
+      d.className='cell';
+      board.insertBefore(d, document.getElementById('overlay'));
+      cellEls.push(d);
+    }
+  }
+
+  /* ---------- 렌더 ---------- */
+  function recomputeDone(){
+    for(let k=0;k<numColors;k++){
+      const p=colorPaths[k];
+      colorDone[k] = p.length>=2 && endpointOf[p[0]]===k && endpointOf[p[p.length-1]]===k && p[0]!==p[p.length-1];
+    }
+  }
+  function render(){
+    recomputeDone();
+    const conn=Array.from({length:N},()=>'');
+    for(let k=0;k<numColors;k++){
+      const p=colorPaths[k];
+      for(let i=0;i<p.length-1;i++){
+        const a=p[i], b=p[i+1], diff=b-a;
+        if(diff===1){ conn[a]+='r'; conn[b]+='l'; }
+        else if(diff===-1){ conn[a]+='l'; conn[b]+='r'; }
+        else if(diff===W){ conn[a]+='d'; conn[b]+='u'; }
+        else if(diff===-W){ conn[a]+='u'; conn[b]+='d'; }
+      }
+    }
+    for(let i=0;i<N;i++){
+      const el=cellEls[i], col=cellColor[i]; let html='';
+      if(col>=0){
+        const hex=PAL[col], done=colorDone[col];
+        const c=conn[i];
+        if(c.includes('u')) html+=`<span class="arm u" style="background:${hex}"></span>`;
+        if(c.includes('d')) html+=`<span class="arm d" style="background:${hex}"></span>`;
+        if(c.includes('l')) html+=`<span class="arm l" style="background:${hex}"></span>`;
+        if(c.includes('r')) html+=`<span class="arm r" style="background:${hex}"></span>`;
+        html+=`<span class="core${done?' done':''}" style="background:${hex}${done?';box-shadow:0 0 12px '+hex:''}"></span>`;
+      }
+      const ep=endpointOf[i];
+      if(ep>=0){
+        const hex=PAL[ep], done=colorDone[ep];
+        html+=`<span class="term${done?' done':''}" style="background:${hex}"></span>`;
+      }
+      el.innerHTML=html;
+    }
+  }
+
+  function updateHud(){
+    recomputeDone();
+    let done=0; for(let k=0;k<numColors;k++) if(colorDone[k]) done++;
+    let filled=0; for(let i=0;i<N;i++) if(cellColor[i]>=0) filled++;
+    document.getElementById('conn').textContent=done;
+    document.getElementById('total').textContent=numColors;
+    document.getElementById('fill').innerHTML=Math.round(filled/N*100)+'<small style="font-size:11px">%</small>';
+    document.getElementById('bar').style.width=(done/numColors*100)+'%';
+    document.getElementById('stage').textContent=stage;
+    document.getElementById('points').innerHTML=points.toLocaleString()+'<small>P</small>';
+  }
+
+  /* ---------- 드로잉 로직 ---------- */
+  function adjacent(a,b){
+    const ra=(a/W)|0, ca=a%W, rb=(b/W)|0, cb=b%W;
+    return (ra===rb && Math.abs(ca-cb)===1) || (ca===cb && Math.abs(ra-rb)===1);
+  }
+  function clearColor(k){ for(const idx of colorPaths[k]) cellColor[idx]=-1; colorPaths[k]=[]; }
+  function cutColor(m, atCell){
+    const p=colorPaths[m], j=p.indexOf(atCell); if(j<0) return;
+    for(let x=j;x<p.length;x++) if(cellColor[p[x]]===m) cellColor[p[x]]=-1;
+    colorPaths[m]=p.slice(0,j);
+  }
+  function startColor(k, epCell){ clearColor(k); colorPaths[k]=[epCell]; cellColor[epCell]=k; }
+  function grabPath(k, cell){
+    const p=colorPaths[k], j=p.indexOf(cell); if(j<0) return;
+    for(let x=j+1;x<p.length;x++) cellColor[p[x]]=-1;
+    colorPaths[k]=p.slice(0,j+1);
+  }
+
+  function step(target){
+    const k=active, p=colorPaths[k], head=p[p.length-1];
+    if(target===head || !adjacent(target,head)) return;
+    if(p.length>=2 && target===p[p.length-2]){ cellColor[p.pop()]=-1; render(); updateHud(); return; }
+    const inIdx=p.indexOf(target);
+    if(inIdx>=0){ for(let x=p.length-1;x>inIdx;x--) cellColor[p[x]]=-1; colorPaths[k]=p.slice(0,inIdx+1); render(); return; }
+    const tEp=endpointOf[target];
+    if(tEp>=0 && tEp!==k) return;                 // 다른 색 단자는 통과 불가
+    const tc=cellColor[target];
+    if(tc>=0 && tc!==k) cutColor(tc, target);      // 다른 케이블 위를 지나가면 끊김
+    cellColor[target]=k; p.push(target);
+    render(); updateHud(); checkWin();
+  }
+
+  function cellAt(e){
+    const rect=board.getBoundingClientRect();
+    const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(x<0||y<0||x>rect.width||y>rect.height) return null;
+    const c=Math.min(W-1,Math.max(0,Math.floor(x/(rect.width/W))));
+    const r=Math.min(H-1,Math.max(0,Math.floor(y/(rect.height/H))));
+    return r*W+c;
+  }
+
+  board.addEventListener('pointerdown',e=>{
+    if(overlay.classList.contains('show')) return;
+    const cell=cellAt(e); if(cell==null) return;
+    board.setPointerCapture(e.pointerId);
+    const ep=endpointOf[cell], col=cellColor[cell];
+    if(ep>=0){ active=ep; startColor(ep,cell); drawing=true; }
+    else if(col>=0){ active=col; grabPath(col,cell); drawing=true; }
+    else return;
+    render(); updateHud();
+  });
+  board.addEventListener('pointermove',e=>{
+    if(!drawing) return; e.preventDefault();
+    const cell=cellAt(e); if(cell!=null) step(cell);
+  },{passive:false});
+  window.addEventListener('pointerup',()=>{ drawing=false; active=-1; });
+
+  /* ---------- 승리 / 진행 ---------- */
+  const overlay=document.getElementById('overlay');
+  function checkWin(){
+    recomputeDone();
+    for(let k=0;k<numColors;k++) if(!colorDone[k]) return;
+    for(let i=0;i<N;i++) if(cellColor[i]<0) return;   // 모든 칸 채움 필요
+    win();
+  }
+  function win(){
+    const reward=W*numColors*3;
+    points+=reward;
+    awardPoints(reward);                               // << 백엔드 연동 훅
+    updateHud();
+    document.getElementById('o-head').textContent='STAGE '+stage+' CLEAR';
+    document.getElementById('o-reward').innerHTML='+'+reward+'<span class="p">P</span>';
+    setTimeout(()=>overlay.classList.add('show'), 420);
+  }
+  function nextStage(){ stage++; overlay.classList.remove('show'); const p=params(stage); genPuzzle(p.size,p.colors); }
+  function params(s){
+    return { size:Math.min(8, 5+Math.floor((s-1)/2)),
+             colors:Math.min(PAL.length, 4+Math.floor(s/2)) };
+  }
+
+  // === 실제 앱 연동 지점 ===
+  function awardPoints(pts){
+    // 실제 서비스: 충전 세션 활성 검증 후 포인트 적립 API 호출
+    // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', points:pts, stage:stage}, '*');
+    console.log('[전류 잇기] 포인트 적립 요청:', pts, 'P (stage '+stage+')');
+  }
+
+  document.getElementById('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); };
+  document.getElementById('newp').onclick=()=>{ const p=params(stage); genPuzzle(p.size,p.colors); };
+  document.getElementById('o-next').onclick=nextStage;
+  document.getElementById('o-restart').onclick=()=>{ stage=1; points=0; overlay.classList.remove('show'); const p=params(1); genPuzzle(p.size,p.colors); };
+
+  const p0=params(1); genPuzzle(p0.size,p0.colors);
+})();
+</script>
+</body>
+</html>
