@@ -13,13 +13,16 @@
     --cyan:#41E6E0; --cyan-dim:#2CB6B2; --amber:#FFB84D;
     --ink:#ECECFF; --muted:#8785BE; --muted2:#5F5D95;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  /* 태블릿에서 길게 누를 때 뜨는 "복사/잘라내기" 콜아웃과 텍스트 선택을 전부 차단 */
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+    -webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;}
   html,body{margin:0;height:100%;}
   body{
     background:radial-gradient(120% 80% at 50% -10%, #201E44 0%, var(--bg) 55%, #0D0C20 100%);
     color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;
     display:flex;justify-content:center;align-items:flex-start;
     min-height:100dvh;padding:16px 14px 30px;overflow-x:hidden;
+    touch-action:manipulation;overscroll-behavior:none;
   }
   .app{width:100%;max-width:440px;}
 
@@ -314,7 +317,16 @@
     return r*W+c;
   }
 
+  /* 길게 누르기·드래그로 뜨는 선택 메뉴(복사/잘라내기)와 컨텍스트 메뉴 차단.
+     오버레이 버튼은 정상 탭돼야 하므로 제외한다. */
+  const isBtn=t=>!!(t&&t.closest&&t.closest('button'));
+  board.addEventListener('touchstart',e=>{ if(!isBtn(e.target)) e.preventDefault(); },{passive:false});
+  board.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('selectstart',e=>e.preventDefault());
+  document.addEventListener('dragstart',e=>e.preventDefault());
+
   board.addEventListener('pointerdown',e=>{
+    if(!isBtn(e.target)) e.preventDefault();
     if(overlay.classList.contains('show')) return;
     const cell=cellAt(e); if(cell==null) return;
     board.setPointerCapture(e.pointerId);
