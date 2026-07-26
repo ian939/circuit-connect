@@ -94,6 +94,101 @@
   .overlay .o-btns{display:flex;gap:10px;width:100%;max-width:300px;}
   .overlay .btn.primary{background:linear-gradient(180deg,var(--cyan),var(--cyan-dim));color:#062322;
     border-color:transparent;font-weight:700;box-shadow:0 8px 22px #41E6E055;}
+  /* ---------- 탭 / 뷰 ---------- */
+  .tabs{display:flex;gap:5px;background:#00000033;border:1px solid var(--line);
+    border-radius:14px;padding:4px;margin-bottom:12px;}
+  .tab{flex:1;border:0;background:transparent;color:var(--muted);font-family:inherit;
+    font-size:13px;font-weight:600;padding:9px 6px;border-radius:10px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s,color .15s;}
+  .tab.active{background:linear-gradient(180deg,#2E2D5C,#232246);color:var(--ink);box-shadow:0 2px 8px #0004;}
+  .tab .lock{font-size:11px;opacity:.85;}
+  .tab .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);}
+  .view{display:none;}
+  .view.on{display:block;}
+
+  /* ---------- 챌린지 로비 ---------- */
+  .lobby-head{display:flex;justify-content:space-between;align-items:baseline;
+    margin:2px 3px 11px;font-family:"IBM Plex Mono",monospace;}
+  .lobby-head .d{font-size:13px;color:var(--cyan);font-weight:600;letter-spacing:.07em;}
+  .lobby-head .r{font-size:9.5px;color:var(--muted2);letter-spacing:.13em;text-transform:uppercase;}
+
+  .ch-card{width:100%;text-align:left;display:grid;grid-template-columns:46px 1fr auto;
+    align-items:center;gap:12px;background:linear-gradient(180deg,var(--panel),#171633);
+    border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:10px;
+    color:var(--ink);font-family:inherit;cursor:pointer;
+    box-shadow:inset 0 1px 0 #ffffff10,0 6px 18px #0004;transition:transform .08s,border-color .15s;}
+  .ch-card:hover{border-color:var(--cyan-dim);}
+  .ch-card:active{transform:scale(.985);}
+  .ch-card .no{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+    background:#00000038;border:1px solid #ffffff0f;font-family:"IBM Plex Mono",monospace;
+    font-size:18px;font-weight:700;color:var(--cyan);}
+  .ch-card.cleared .no{color:#062322;border-color:transparent;
+    background:linear-gradient(180deg,var(--cyan),var(--cyan-dim));box-shadow:0 0 16px #41E6E055;}
+  .ch-card .nm,.ch-card .mt,.ch-card .rc{display:block;}
+  .ch-card .nm{font-size:15px;font-weight:700;letter-spacing:-.01em;}
+  .ch-card .mt{font-size:10.5px;color:var(--muted);font-family:"IBM Plex Mono",monospace;
+    margin-top:3px;letter-spacing:.06em;}
+  .ch-card .rc{font-size:11.5px;font-family:"IBM Plex Mono",monospace;margin-top:5px;color:var(--muted2);}
+  .ch-card .rc b{color:var(--cyan);font-weight:600;}
+  .ch-card .rc i{color:var(--amber);font-style:normal;font-weight:700;}
+  .ch-card .go{font-size:17px;color:var(--muted2);padding-right:2px;}
+
+  .locked{background:linear-gradient(180deg,var(--panel),#171633);border:1px dashed var(--line);
+    border-radius:18px;padding:30px 22px;text-align:center;}
+  .locked .ico{font-size:32px;line-height:1;}
+  .locked h3{margin:12px 0 6px;font-size:17px;font-weight:700;}
+  .locked p{color:var(--muted);font-size:12.5px;line-height:1.65;margin:0 0 18px;}
+  .locked .lbar{height:10px;border-radius:6px;background:var(--slot);overflow:hidden;border:1px solid #00000030;}
+  .locked .lbar>i{display:block;height:100%;border-radius:6px;
+    background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));box-shadow:0 0 12px var(--cyan);
+    transition:width .4s cubic-bezier(.2,.7,.2,1);}
+  .locked .lnum{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--cyan);margin-top:9px;}
+
+  /* ---------- 챌린지 플레이 헤더 ---------- */
+  .playbar{display:none;align-items:center;gap:10px;margin:0 2px 11px;}
+  .playbar.on{display:flex;}
+  .playbar .back{border:1px solid var(--line);background:#00000030;color:var(--ink);
+    border-radius:10px;padding:7px 11px;font-family:inherit;font-size:12.5px;font-weight:600;
+    cursor:pointer;transition:transform .08s;}
+  .playbar .back:active{transform:scale(.96);}
+  .playbar .t{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);
+    letter-spacing:.13em;text-transform:uppercase;}
+
+  /* ---------- 랭킹 시트 ---------- */
+  .sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;
+    background:rgba(7,6,21,.66);backdrop-filter:blur(5px);}
+  .sheet.show{display:flex;animation:fade .2s ease;}
+  .sheet-in{width:100%;max-width:440px;background:linear-gradient(180deg,#242349,#15142E);
+    border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;
+    padding:16px 15px calc(20px + env(safe-area-inset-bottom));
+    max-height:88dvh;overflow:auto;animation:up .26s cubic-bezier(.2,.8,.2,1);}
+  @keyframes up{from{transform:translateY(28px);opacity:.4;}to{transform:none;opacity:1;}}
+  .sheet .grab{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 14px;}
+  .sheet h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em;}
+  .sheet .sub2{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);
+    letter-spacing:.15em;text-transform:uppercase;margin:5px 0 14px;}
+  .rswitch{display:flex;gap:5px;background:#00000033;border:1px solid var(--line);
+    border-radius:12px;padding:4px;margin:0 0 13px;}
+  .rswitch button{flex:1;border:0;background:transparent;color:var(--muted);font-family:inherit;
+    font-size:12px;font-weight:600;padding:8px 4px;border-radius:9px;cursor:pointer;}
+  .rswitch button.on{background:linear-gradient(180deg,#2E2D5C,#232246);color:var(--ink);}
+  .rank{list-style:none;margin:0;padding:0;}
+  .rank li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:12px;background:#00000026;border:1px solid #ffffff0a;margin-bottom:6px;}
+  .rank li.me{background:linear-gradient(90deg,#41E6E024,#41E6E00a);border-color:#41E6E055;}
+  .rank .p{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:700;
+    color:var(--muted2);text-align:center;}
+  .rank .p.g1{color:#FFD86B;} .rank .p.g2{color:#CFD6E8;} .rank .p.g3{color:#E0975C;}
+  .rank .nm2{font-size:14px;font-weight:600;}
+  .rank li.me .nm2:after{content:'YOU';font-family:"IBM Plex Mono",monospace;font-size:9px;
+    background:var(--cyan);color:#062322;border-radius:5px;padding:2px 5px;margin-left:7px;
+    vertical-align:1.5px;font-weight:700;letter-spacing:.05em;}
+  .rank .tm{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;color:var(--cyan);}
+  .rank .tm.non{color:var(--muted2);}
+  .sheet .btn{width:100%;margin-top:13px;}
+
+  .stat .v.sm{font-size:16px;}
+
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
 </style>
 </head>
@@ -106,6 +201,27 @@
     <div><h1>전류 잇기</h1><div class="sub">Connect · Fill · Charge</div></div>
   </div>
 
+  <div class="tabs">
+    <button class="tab active" id="tab-onboard">온보딩</button>
+    <button class="tab" id="tab-challenge">데일리 챌린지 <span class="lock" id="tab-lock">🔒</span></button>
+  </div>
+
+  <!-- ===================== 챌린지 로비 ===================== -->
+  <div class="view" id="view-lobby">
+    <div class="lobby-head">
+      <span class="d" id="ch-date">—</span>
+      <span class="r">매일 자정 초기화</span>
+    </div>
+    <div id="ch-list"></div>
+  </div>
+
+  <!-- ===================== 게임 보드 ===================== -->
+  <div class="view on" id="view-game">
+  <div class="playbar" id="playbar">
+    <button class="back" id="back">← 목록</button>
+    <span class="t" id="play-title"></span>
+  </div>
+
   <div class="readout">
     <div class="meter-top">
       <span class="lab">회로 완성도</span>
@@ -113,9 +229,9 @@
     </div>
     <div class="bar"><i id="bar"></i></div>
     <div class="stats">
-      <div class="stat"><div class="k">Stage</div><div class="v" id="stage">1</div></div>
+      <div class="stat"><div class="k" id="k1">Stage</div><div class="v" id="stage">1</div></div>
       <div class="stat"><div class="k">채움</div><div class="v" id="fill">0<small style="font-size:11px">%</small></div></div>
-      <div class="stat pt"><div class="k">적립 포인트</div><div class="v" id="points">0<small>P</small></div></div>
+      <div class="stat pt"><div class="k" id="k3">적립 포인트</div><div class="v" id="points">0<small>P</small></div></div>
     </div>
   </div>
 
@@ -144,7 +260,20 @@
       새 판
     </button>
   </div>
-  <div class="hint">같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성</div>
+  <div class="hint" id="hint">같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성</div>
+  </div><!-- /view-game -->
+</div>
+
+<!-- ===================== 랭킹 시트 ===================== -->
+<div class="sheet" id="sheet">
+  <div class="sheet-in">
+    <div class="grab"></div>
+    <h3 id="rank-title">랭킹</h3>
+    <div class="sub2" id="rank-sub">FASTEST TIME</div>
+    <div class="rswitch" id="rank-switch"></div>
+    <ol class="rank" id="rank-list"></ol>
+    <button class="btn" id="sheet-close">닫기</button>
+  </div>
 </div>
 
 <script>
@@ -157,6 +286,81 @@
   let cellEls=[], stage=1, points=0;
   let drawing=false, active=-1;
 
+  /* ================= 챌린지 설정 ================= */
+  const ONBOARD_LEN=10;                       // 온보딩: 10스테이지
+  const ME='Ian';                             // 로그인 붙기 전 임시 내 ID
+  const NAMES=['Ian','Cristie','Tiffny','John','Morgan','Tommy','Anders','Hazle','Judge','Andy'];
+  const CHALLENGES=[
+    { name:'워밍업',   size:6, colors:5, base: 52000 },
+    { name:'러시아워', size:7, colors:6, base: 96000 },
+    { name:'과부하',   size:8, colors:8, base:165000 },
+  ];
+  const RANK_P=[500,380,300,250,210,180,150,120,100,80];   // 순위별 첫 완주 보너스
+
+  /* ---------- 시드 난수 : 같은 날 = 같은 문제 = 공정한 랭킹 ---------- */
+  function hashStr(s){
+    let h=2166136261>>>0;
+    for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+    return h>>>0;
+  }
+  function mulberry32(a){
+    return function(){
+      a=a+0x6D2B79F5|0;
+      let t=Math.imul(a^a>>>15, 1|a);
+      t=t+Math.imul(t^t>>>7, 61|t)^t;
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+  let rnd=Math.random;                        // genPuzzle 이 시드에 따라 교체
+
+  /* ---------- 저장 ---------- */
+  const KEY='circuit-connect.v1';
+  let store={ maxStage:1, points:0, unlocked:false, daily:{} };
+  try{ const raw=localStorage.getItem(KEY); if(raw) store=Object.assign(store, JSON.parse(raw)||{}); }catch(e){}
+  function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+
+  function todayKey(){
+    const d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function todayRec(){
+    const t=todayKey();
+    if(!store.daily || typeof store.daily!=='object') store.daily={};
+    for(const k of Object.keys(store.daily)) if(k!==t) delete store.daily[k];   // 날짜 바뀌면 초기화
+    if(!store.daily[t]) store.daily[t]={};
+    return store.daily[t];
+  }
+  function myBest(ci){ const r=todayRec()[ci]; return r? r.ms : null; }
+
+  /* ---------- 시간 표기 ---------- */
+  function fmt(ms){
+    if(ms==null) return '--:--';
+    const t=Math.floor(ms/100), s=Math.floor(t/10);
+    return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+'.'+(t%10);
+  }
+
+  /* ---------- 랭킹 : 봇 기록도 날짜 시드라 새로고침해도 그대로 ---------- */
+  function botTimes(ci){
+    const key=todayKey();
+    return NAMES.filter(n=>n!==ME).map(n=>{
+      const r=mulberry32(hashStr(key+'|'+ci+'|'+n));
+      r(); r();
+      return { name:n, ms:Math.round(CHALLENGES[ci].base*(0.52+r()*1.15)) };
+    });
+  }
+  function leaderboard(ci){
+    const list=botTimes(ci);
+    list.push({ name:ME, ms:myBest(ci), me:true });
+    list.sort((a,b)=>{
+      if(a.ms==null && b.ms==null) return 0;
+      if(a.ms==null) return 1;
+      if(b.ms==null) return -1;
+      return a.ms-b.ms;
+    });
+    return list;
+  }
+  function myRank(ci){ return leaderboard(ci).findIndex(x=>x.me)+1; }
+
   /* ---------- 레벨 생성기 : 항상 정답이 존재 (해밀턴 경로를 잘라 색 배정) ---------- */
   function neighbors(cell){
     const r=(cell/W)|0, c=cell%W, out=[];
@@ -164,7 +368,8 @@
     if(c>0) out.push(cell-1); if(c<W-1) out.push(cell+1);
     return out;
   }
-  function genPuzzle(size,colors){
+  function genPuzzle(size,colors,seed){
+    rnd = (seed==null) ? Math.random : mulberry32(seed>>>0);
     W=H=size; N=W*H;
     // 1) 지그재그 해밀턴 경로
     let path=[];
@@ -177,9 +382,9 @@
     for(let i=0;i<N;i++) posIdx[path[i]]=i;
     const iters=N*22;
     for(let it=0;it<iters;it++){
-      if(Math.random()<0.5){ path.reverse(); for(let i=0;i<N;i++) posIdx[path[i]]=i; }
+      if(rnd()<0.5){ path.reverse(); for(let i=0;i<N;i++) posIdx[path[i]]=i; }
       const u=path[N-1], nb=neighbors(u);
-      const w=nb[(Math.random()*nb.length)|0];
+      const w=nb[(rnd()*nb.length)|0];
       if(w===path[N-2]) continue;
       const i=posIdx[w];
       let lo=i+1, hi=N-1;
@@ -191,7 +396,7 @@
     const base=Math.floor(N/numColors), rem=N%numColors, sizes=[];
     for(let i=0;i<numColors;i++) sizes.push(base+(i<rem?1:0));
     for(let s=0;s<numColors*3;s++){
-      const i=(Math.random()*numColors)|0, j=(Math.random()*numColors)|0;
+      const i=(rnd()*numColors)|0, j=(rnd()*numColors)|0;
       if(i!==j && sizes[i]>2){ sizes[i]--; sizes[j]++; }
     }
     // 4) 상태 초기화 + 단자 배치
@@ -264,16 +469,27 @@
     }
   }
 
+  const el=id=>document.getElementById(id);
   function updateHud(){
     recomputeDone();
     let done=0; for(let k=0;k<numColors;k++) if(colorDone[k]) done++;
     let filled=0; for(let i=0;i<N;i++) if(cellColor[i]>=0) filled++;
-    document.getElementById('conn').textContent=done;
-    document.getElementById('total').textContent=numColors;
-    document.getElementById('fill').innerHTML=Math.round(filled/N*100)+'<small style="font-size:11px">%</small>';
-    document.getElementById('bar').style.width=(done/numColors*100)+'%';
-    document.getElementById('stage').textContent=stage;
-    document.getElementById('points').innerHTML=points.toLocaleString()+'<small>P</small>';
+    el('conn').textContent=done;
+    el('total').textContent=numColors;
+    el('fill').innerHTML=Math.round(filled/N*100)+'<small style="font-size:11px">%</small>';
+    el('bar').style.width=(done/numColors*100)+'%';
+
+    const s1=el('stage'), s3=el('points');
+    if(inPlay){                                        // 챌린지 진행 중
+      el('k1').textContent='경과 시간';  s1.className='v sm'; s1.textContent=fmt(elapsed());
+      el('k3').textContent='내 최고';    s3.className='v sm'; s3.textContent=fmt(myBest(chIndex));
+    } else {                                           // 온보딩
+      el('k1').textContent='Stage';
+      s1.className = stage<=ONBOARD_LEN ? 'v sm' : 'v';
+      s1.textContent = stage<=ONBOARD_LEN ? stage+' / '+ONBOARD_LEN : String(stage);
+      el('k3').textContent='적립 포인트'; s3.className='v';
+      s3.innerHTML=points.toLocaleString()+'<small>P</small>';
+    }
   }
 
   /* ---------- 드로잉 로직 ---------- */
@@ -342,24 +558,206 @@
   },{passive:false});
   window.addEventListener('pointerup',()=>{ drawing=false; active=-1; });
 
-  /* ---------- 승리 / 진행 ---------- */
-  const overlay=document.getElementById('overlay');
+  /* ================= 모드 / 화면 전환 ================= */
+  const overlay=el('overlay');
+  let mode='onboard';        // 'onboard' | 'challenge'
+  let chIndex=-1;            // 진행 중인 챌린지 번호
+  let inPlay=false;          // 챌린지 보드를 실제로 풀고 있는 중
+  let onboardSnap=null;      // 탭 이동 시 온보딩 판 보존
+
+  function snapshot(){
+    return { W,H,N,numColors, stage,
+             cellColor:Int32Array.from(cellColor), endpointOf:Int32Array.from(endpointOf),
+             colorPaths:colorPaths.map(p=>p.slice()) };
+  }
+  function restore(s){
+    W=s.W; H=s.H; N=s.N; numColors=s.numColors; stage=s.stage;
+    cellColor=Int32Array.from(s.cellColor); endpointOf=Int32Array.from(s.endpointOf);
+    colorPaths=s.colorPaths.map(p=>p.slice()); colorDone=new Array(numColors).fill(false);
+    buildBoard(); render(); updateHud();
+  }
+
+  /* ---------- 타이머 : 판이 열리는 순간부터 카운트 ---------- */
+  let chStart=0, chTick=null, chRunning=false, chFinal=0;
+  function elapsed(){ return chRunning ? Date.now()-chStart : chFinal; }
+  function startTimer(){
+    chStart=Date.now(); chFinal=0; chRunning=true;
+    clearInterval(chTick); chTick=setInterval(updateHud,100); updateHud();
+  }
+  function stopTimer(){ if(chRunning) chFinal=Date.now()-chStart; chRunning=false; clearInterval(chTick); chTick=null; }
+
+  /* ---------- 탭 ---------- */
+  function renderTabs(){
+    el('tab-onboard').classList.toggle('active', mode==='onboard');
+    el('tab-challenge').classList.toggle('active', mode==='challenge');
+    const lock=el('tab-lock');
+    if(!store.unlocked){ lock.className='lock'; lock.textContent='🔒'; }
+    else {
+      const rec=todayRec(), left=CHALLENGES.filter((c,i)=>!rec[i]).length;
+      if(left){ lock.className='dot'; lock.textContent=''; }
+      else { lock.className='lock'; lock.textContent='✓'; }
+    }
+  }
+  function showView(v){
+    el('view-lobby').classList.toggle('on', v==='lobby');
+    el('view-game').classList.toggle('on', v==='game');
+  }
+
+  function goOnboard(){
+    stopTimer(); mode='onboard'; inPlay=false; chIndex=-1;
+    el('playbar').classList.remove('on');
+    el('newp').innerHTML=NEWP_HTML;
+    el('hint').textContent='같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성';
+    showView('game'); renderTabs();
+    if(onboardSnap) restore(onboardSnap); else { const p=params(stage); genPuzzle(p.size,p.colors); }
+  }
+  function goLobby(){
+    if(mode==='onboard') onboardSnap=snapshot();
+    stopTimer(); mode='challenge'; inPlay=false; chIndex=-1;
+    showView('lobby'); renderTabs(); renderLobby();
+  }
+
+  /* ---------- 로비 ---------- */
+  function renderLobby(){
+    const d=new Date();
+    el('ch-date').textContent=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+    const list=el('ch-list');
+
+    if(!store.unlocked){
+      const cur=Math.min(store.maxStage, ONBOARD_LEN);
+      list.innerHTML=
+        '<div class="locked">'+
+          '<div class="ico">🔒</div>'+
+          '<h3>온보딩 '+ONBOARD_LEN+'단계를 먼저 통과하세요</h3>'+
+          '<p>온보딩을 끝내면 매일 3개의 챌린지가 열립니다.<br>가장 빨리 푼 순서대로 랭킹이 매겨져요.</p>'+
+          '<div class="lbar"><i style="width:'+(cur/ONBOARD_LEN*100)+'%"></i></div>'+
+          '<div class="lnum">'+cur+' / '+ONBOARD_LEN+' 단계</div>'+
+        '</div>';
+      return;
+    }
+
+    const rec=todayRec();
+    list.innerHTML=CHALLENGES.map((c,i)=>{
+      const r=rec[i], done=!!r;
+      const info = done
+        ? '내 기록 <b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i>'
+        : '기록 없음 · 열면 바로 시간 카운트';
+      return '<button class="ch-card'+(done?' cleared':'')+'" data-i="'+i+'">'+
+        '<span class="no">'+(done?'✓':(i+1))+'</span>'+
+        '<span><span class="nm">'+c.name+'</span>'+
+          '<span class="mt">'+c.size+'×'+c.size+' · '+c.colors+'색</span>'+
+          '<span class="rc">'+info+'</span></span>'+
+        '<span class="go">'+(done?'⟳':'▶')+'</span></button>';
+    }).join('')+
+    '<button class="btn" id="see-rank" style="width:100%;margin-top:4px">🏆 오늘의 랭킹 보기</button>';
+
+    list.querySelectorAll('.ch-card').forEach(b=>b.onclick=()=>startChallenge(+b.dataset.i));
+    el('see-rank').onclick=()=>openRank(0);
+  }
+
+  /* ---------- 챌린지 시작 ---------- */
+  function startChallenge(i){
+    mode='challenge'; chIndex=i; inPlay=true;
+    const c=CHALLENGES[i];
+    el('playbar').classList.add('on');
+    el('play-title').textContent='Challenge '+(i+1)+' · '+c.name;
+    el('newp').innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 1 0-.9 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>다시 시작';
+    el('hint').textContent='판이 열린 순간부터 시간이 흐릅니다 · 최단 기록으로 랭킹';
+    showView('game'); renderTabs();
+    // 날짜+번호 시드 → 같은 날엔 누구나 똑같은 문제
+    genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i));
+    startTimer();
+  }
+
+  /* ---------- 랭킹 시트 ---------- */
+  const sheet=el('sheet');
+  function openRank(ci){
+    el('rank-title').textContent='Challenge '+(ci+1)+' · '+CHALLENGES[ci].name;
+    el('rank-sub').textContent=todayKey()+' · FASTEST TIME';
+    el('rank-list').innerHTML=leaderboard(ci).map((r,i)=>{
+      const g=i<3?' g'+(i+1):'';
+      return '<li class="'+(r.me?'me':'')+'">'+
+        '<span class="p'+g+'">'+(r.ms==null?'-':(i+1))+'</span>'+
+        '<span class="nm2">'+r.name+'</span>'+
+        '<span class="tm'+(r.ms==null?' non':'')+'">'+(r.ms==null?'미완료':fmt(r.ms))+'</span></li>';
+    }).join('');
+    const sw=el('rank-switch');
+    sw.innerHTML=CHALLENGES.map((c,i)=>'<button class="'+(i===ci?'on':'')+'" data-i="'+i+'">'+(i+1)+'. '+c.name+'</button>').join('');
+    sw.querySelectorAll('button').forEach(b=>b.onclick=()=>openRank(+b.dataset.i));
+    sheet.classList.add('show');
+  }
+  sheet.onclick=e=>{ if(e.target===sheet) sheet.classList.remove('show'); };
+  el('sheet-close').onclick=()=>sheet.classList.remove('show');
+
+  /* ================= 승리 처리 ================= */
   function checkWin(){
     recomputeDone();
     for(let k=0;k<numColors;k++) if(!colorDone[k]) return;
     for(let i=0;i<N;i++) if(cellColor[i]<0) return;   // 모든 칸 채움 필요
     win();
   }
-  function win(){
-    const reward=W*numColors*3;
-    points+=reward;
-    awardPoints(reward);                               // << 백엔드 연동 훅
-    updateHud();
-    document.getElementById('o-head').textContent='STAGE '+stage+' CLEAR';
-    document.getElementById('o-reward').innerHTML='+'+reward+'<span class="p">P</span>';
+  function setOverlay(o){
+    overlay.querySelector('.big').textContent=o.big;
+    el('o-head').textContent=o.head;
+    el('o-reward').innerHTML=o.reward;
+    el('o-desc').innerHTML=o.desc;
+    const L=el('o-restart'), R=el('o-next');
+    L.textContent=o.left.t;  L.onclick=o.left.fn;
+    R.textContent=o.right.t; R.onclick=o.right.fn;
     setTimeout(()=>overlay.classList.add('show'), 420);
   }
-  function nextStage(){ stage++; overlay.classList.remove('show'); const p=params(stage); genPuzzle(p.size,p.colors); }
+  function win(){ inPlay ? winChallenge() : winOnboard(); }
+
+  function winOnboard(){
+    const reward=W*numColors*3;
+    points+=reward; store.points=points;
+    if(stage+1>store.maxStage) store.maxStage=stage+1;
+    const justUnlocked = (stage>=ONBOARD_LEN && !store.unlocked);
+    if(justUnlocked) store.unlocked=true;
+    persist(); awardPoints(reward); updateHud(); renderTabs();
+
+    if(justUnlocked){
+      setOverlay({ big:'온보딩 완료', head:'챌린지 해금!', reward:'+'+reward+'<span class="p">P</span>',
+        desc:'매일 3개의 챌린지가 열립니다.<br>가장 빨리 푼 순서대로 랭킹이 매겨져요.',
+        left:{t:'계속 연습', fn:nextStage},
+        right:{t:'챌린지 보기', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
+    } else {
+      setOverlay({ big:'회로 완성', head:'STAGE '+stage+' CLEAR', reward:'+'+reward+'<span class="p">P</span>',
+        desc:'모든 회로가 연결됐어요. 충전 포인트가 적립됐습니다.',
+        left:{t:'처음부터', fn:resetOnboard}, right:{t:'다음 스테이지', fn:nextStage} });
+    }
+  }
+
+  function winChallenge(){
+    stopTimer();
+    const ms=chFinal, rec=todayRec(), prev=rec[chIndex];
+    const improved = !prev || ms<prev.ms;
+    const best = improved ? ms : prev.ms;
+    rec[chIndex]={ ms:best, rewarded: prev ? prev.rewarded : false };
+
+    let reward=0;
+    if(!rec[chIndex].rewarded){                       // 그날 첫 완주에만 순위 보너스
+      const rk=myRank(chIndex);
+      reward=RANK_P[Math.min(rk,RANK_P.length)-1];
+      rec[chIndex].rewarded=true;
+      points+=reward; store.points=points; awardPoints(reward);
+    }
+    persist(); updateHud(); renderTabs();
+
+    const rk=myRank(chIndex);
+    setOverlay({
+      big:'챌린지 완주',
+      head:fmt(ms),
+      reward: reward ? '+'+reward+'<span class="p">P</span>' : rk+'<span class="p">위</span>',
+      desc: (improved ? '<b style="color:#41E6E0">최고 기록 갱신!</b><br>' : '최고 기록 '+fmt(best)+' · ')
+            +'오늘 '+NAMES.length+'명 중 <b style="color:#FFB84D">'+rk+'위</b>',
+      left:{t:'목록으로', fn:()=>{ overlay.classList.remove('show'); goLobby(); }},
+      right:{t:'랭킹 보기', fn:()=>{ overlay.classList.remove('show'); openRank(chIndex); }}
+    });
+  }
+
+  function nextStage(){ overlay.classList.remove('show'); stage++; onboardSnap=null; const p=params(stage); genPuzzle(p.size,p.colors); }
+  function resetOnboard(){ overlay.classList.remove('show'); stage=1; onboardSnap=null; const p=params(1); genPuzzle(p.size,p.colors); }
   function params(s){
     return { size:Math.min(8, 5+Math.floor((s-1)/2)),
              colors:Math.min(PAL.length, 4+Math.floor(s/2)) };
@@ -369,15 +767,25 @@
   function awardPoints(pts){
     // 실제 서비스: 충전 세션 활성 검증 후 포인트 적립 API 호출
     // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', points:pts, stage:stage}, '*');
-    console.log('[전류 잇기] 포인트 적립 요청:', pts, 'P (stage '+stage+')');
+    console.log('[전류 잇기] 포인트 적립 요청:', pts, 'P ('+(inPlay?'challenge '+(chIndex+1):'stage '+stage)+')');
   }
 
-  document.getElementById('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); };
-  document.getElementById('newp').onclick=()=>{ const p=params(stage); genPuzzle(p.size,p.colors); };
-  document.getElementById('o-next').onclick=nextStage;
-  document.getElementById('o-restart').onclick=()=>{ stage=1; points=0; overlay.classList.remove('show'); const p=params(1); genPuzzle(p.size,p.colors); };
+  /* ================= 버튼 배선 ================= */
+  const NEWP_HTML=el('newp').innerHTML;
+  el('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); };
+  el('newp').onclick=()=>{
+    if(inPlay){ startChallenge(chIndex); return; }        // 챌린지는 같은 판 재도전 + 타이머 리셋
+    const p=params(stage); genPuzzle(p.size,p.colors);
+  };
+  el('back').onclick=goLobby;
+  el('tab-onboard').onclick=goOnboard;
+  el('tab-challenge').onclick=goLobby;
 
-  const p0=params(1); genPuzzle(p0.size,p0.colors);
+  /* ================= 초기화 ================= */
+  points=store.points||0;
+  stage=Math.max(1, store.maxStage||1);
+  renderTabs();
+  const p0=params(stage); genPuzzle(p0.size,p0.colors);
 })();
 </script>
 </body>
