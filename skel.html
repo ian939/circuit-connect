@@ -271,6 +271,17 @@
   .board.dense{padding:8px;gap:3px;}
   .cell{position:relative;border-radius:var(--r-sm);background:var(--gray-100);}
   .board.dense .cell{border-radius:var(--r-sm);}
+  /* 탄 자리 : 지나갈 수 없는 칸 */
+  .cell.dead{background:repeating-linear-gradient(45deg,
+      var(--gray-300) 0 4px, var(--gray-200) 4px 8px);}
+  /* 단자 안의 남은 배선 칸수 */
+  .term{display:grid;place-items:center;}
+  .term i{font-style:normal;font-size:12px;font-weight:700;color:#fff;line-height:1;
+    font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(17,24,39,.45);}
+  .term.done i{display:none;}
+  /* 상한 도달 알림 */
+  .board.bump{animation:bump .24s ease;}
+  @keyframes bump{25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
   /* .core / .dline 의 4px 은 UI 라운드가 아니라 배선 굵기에 맞춘 캔버스 지오메트리 */
   .core{position:absolute;left:35%;top:35%;width:30%;height:30%;border-radius:4px;z-index:2;}
   .arm{position:absolute;z-index:1;}
@@ -586,6 +597,8 @@
       <li><b>1</b><span>같은 색 <em>단자 두 개</em>를 드래그해서 배선을 잇습니다</span></li>
       <li><b>2</b><span>배선은 <em>서로 겹칠 수 없어요</em>. 다른 선 위를 지나가면 그 선이 끊깁니다</span></li>
       <li><b>3</b><span><em>빈칸을 하나도 남기지 않고</em> 모두 채워야 수리 완료입니다</span></li>
+      <li><b>4</b><span>단자의 숫자는 <em>더 늘릴 수 있는 칸수</em>. 0이 되면 그 배선은 멈춥니다</span></li>
+      <li><b>5</b><span>빗금 친 <em>탄 자리</em>는 지나갈 수 없어요</span></li>
     </ol>
 
     <div class="tut-note">막히면 <b>지우기</b>로 언제든 다시 배선할 수 있어요</div>
@@ -700,6 +713,7 @@
   const board=document.getElementById('board');
 
   let W,H,N, cellColor, endpointOf, colorPaths, colorDone, numColors;
+  let deadCell, capOf, fillTarget=0;        // 고장셀 / 배선 상한 / 채워야 할 칸 수
   let cellEls=[], stage=1;
   let drawing=false, active=-1;
 
@@ -707,19 +721,20 @@
   const ME='Ian';                             // 로그인 붙기 전 임시 내 ID
   const NAMES=['Ian','Cristie','Tiffny','John','Morgan','Tommy','Anders','Hazle','Judge','Andy'];
 
-  const ONBOARD_STEPS=[                       // 온보딩 5판 : 5×5 → 7×7 로 완만하게
-    { size:5, colors:4 },
-    { size:5, colors:5 },
-    { size:6, colors:5 },
-    { size:6, colors:6 },
-    { size:7, colors:6 },
+  /* 정비 교육 5과정 : 기본 → 배선 상한 → 고장셀 순으로 하나씩만 추가해 익히게 한다 */
+  const ONBOARD_STEPS=[
+    { size:5, colors:4, holes:0, slack:null, tip:'같은 색 <b>단자 두 개</b>를 손가락으로 이어보세요' },
+    { size:5, colors:4, holes:0, slack:null, tip:'빈칸을 하나도 남기지 않아야 수리 완료입니다' },
+    { size:6, colors:5, holes:0, slack:5,    tip:'단자의 숫자 = <b>더 늘릴 수 있는 칸수</b>. 0이 되면 막힙니다' },
+    { size:6, colors:5, holes:3, slack:5,    tip:'빗금 친 <b>탄 자리</b>는 지나갈 수 없어요' },
+    { size:7, colors:6, holes:4, slack:4,    tip:'상한과 탄 자리를 함께 고려해 배선하세요' },
   ];
   const ONBOARD_LEN=ONBOARD_STEPS.length;
 
   const CHALLENGES=[                          // 랭킹전 : 8×8 / 9×9 / 10×10
-    { name:'100kW 충전기', kw:100, tag:'완속 · 표준형', size: 8, colors:7, base:170000 },
-    { name:'200kW 충전기', kw:200, tag:'급속 · 고전력', size: 9, colors:8, base:255000 },
-    { name:'350kW 충전기', kw:350, tag:'초급속 · 최고난도', size:10, colors:8, base:360000 },
+    { name:'100kW 충전기', kw:100, tag:'완속 · 표준형',    size:6, colors:5, holes:3, slack:4, base:105000 },
+    { name:'200kW 충전기', kw:200, tag:'급속 · 고전력',    size:7, colors:6, holes:5, slack:3, base:150000 },
+    { name:'350kW 충전기', kw:350, tag:'초급속 · 최고난도', size:8, colors:7, holes:8, slack:2, base:215000 },
   ];
   const DEV=true;                             // ⚠ 테스트용 숨은 단축키. 실서비스 배포 전 false
   const PAY=10;                               // 1판 = 10원 (충전 포인트)
@@ -862,56 +877,175 @@
     persist();
   }
 
-  /* ---------- 레벨 생성기 : 항상 정답이 존재 (해밀턴 경로를 잘라 색 배정) ---------- */
-  function neighbors(cell){
-    const r=(cell/W)|0, c=cell%W, out=[];
-    if(r>0) out.push(cell-W); if(r<H-1) out.push(cell+W);
-    if(c>0) out.push(cell-1); if(c<W-1) out.push(cell+1);
+  /* ---------- 레벨 생성기 ----------
+     해밀턴 경로를 잘라 색을 배정 → 정답이 반드시 존재.
+     고장셀은 경로 양 끝에서 떼어낸 뒤 남은 경로를 다시 섞는 방식이라,
+     구멍을 뚫어도 '남은 칸들의 해밀턴 경로'가 그대로 유지된다.
+     마지막에 해를 세어 3~24개 범위가 아니면 시드를 바꿔 다시 뽑는다. */
+  function neighbors(cell,w,h){
+    w=w||W; h=h||H;
+    const r=(cell/w)|0, c=cell%w, out=[];
+    if(r>0) out.push(cell-w); if(r<h-1) out.push(cell+w);
+    if(c>0) out.push(cell-1); if(c<w-1) out.push(cell+1);
     return out;
   }
-  function genPuzzle(size,colors,seed){
-    rnd = (seed==null) ? Math.random : mulberry32(seed>>>0);
-    W=H=size; N=W*H;
-    // 1) 지그재그 해밀턴 경로
-    let path=[];
-    for(let r=0;r<H;r++){
-      if(r%2===0) for(let c=0;c<W;c++) path.push(r*W+c);
-      else for(let c=W-1;c>=0;c--) path.push(r*W+c);
-    }
-    // 2) backbite 로 무작위화 (해밀턴 유지)
-    const posIdx=new Int32Array(N);
-    for(let i=0;i<N;i++) posIdx[path[i]]=i;
-    const iters=N*22;
+  const MIN_SEG=4;                             // 배선 최소 길이
+  const SOL_MIN=3, SOL_MAX=24;                 // 허용 정답 개수 범위
+  const MAX_TRIES=60;
+
+  function backbite(path, size, alive, r, iters){
+    const n=path.length; if(n<3) return path;
+    const pos=new Map(); path.forEach((c,i)=>pos.set(c,i));
     for(let it=0;it<iters;it++){
-      if(rnd()<0.5){ path.reverse(); for(let i=0;i<N;i++) posIdx[path[i]]=i; }
-      const u=path[N-1], nb=neighbors(u);
-      const w=nb[(rnd()*nb.length)|0];
-      if(w===path[N-2]) continue;
-      const i=posIdx[w];
-      let lo=i+1, hi=N-1;
+      if(r()<0.5){ path.reverse(); path.forEach((c,i)=>pos.set(c,i)); }
+      const nb=neighbors(path[n-1],size,size).filter(alive);
+      if(!nb.length) continue;
+      const w=nb[(r()*nb.length)|0];
+      if(w===path[n-2]) continue;
+      const i=pos.get(w); let lo=i+1, hi=n-1;
       while(lo<hi){ const t=path[lo];path[lo]=path[hi];path[hi]=t;lo++;hi--; }
-      for(let k=i+1;k<N;k++) posIdx[path[k]]=k;
+      for(let k=i+1;k<n;k++) pos.set(path[k],k);
     }
-    // 3) 색 개수만큼 조각내기 (각 조각 길이 >= 2)
-    numColors=Math.min(colors, PAL.length, Math.floor(N/2));
-    const base=Math.floor(N/numColors), rem=N%numColors, sizes=[];
-    for(let i=0;i<numColors;i++) sizes.push(base+(i<rem?1:0));
-    for(let s=0;s<numColors*3;s++){
-      const i=(rnd()*numColors)|0, j=(rnd()*numColors)|0;
-      if(i!==j && sizes[i]>2){ sizes[i]--; sizes[j]++; }
+    return path;
+  }
+
+  /* 한 번 뽑기 : { path, dead, sizes } 또는 null */
+  function drawBoard(size, colors, holes, r){
+    const n=size*size;
+    let path=[];
+    for(let row=0;row<size;row++){
+      if(row%2===0) for(let c=0;c<size;c++) path.push(row*size+c);
+      else for(let c=size-1;c>=0;c--) path.push(row*size+c);
     }
-    // 4) 상태 초기화 + 단자 배치
+    const dead=new Set();
+    const alive=c=>c>=0&&c<n&&!dead.has(c);
+    backbite(path,size,alive,r,n*22);
+
+    let left=holes, guard=0;
+    while(left>0 && guard++<200){
+      const take=Math.min(left, 1+((r()*2)|0));
+      for(let i=0;i<take && path.length>colors*MIN_SEG+2;i++){
+        dead.add(r()<0.5 ? path.shift() : path.pop()); left--;
+      }
+      if(path.length>3) backbite(path,size,alive,r,path.length*10);
+    }
+    if(left>0) return null;
+
+    const nc=Math.min(colors, PAL.length, Math.floor(path.length/MIN_SEG));
+    if(nc<2) return null;
+    const base=Math.floor(path.length/nc), rem=path.length%nc, sizes=[];
+    for(let i=0;i<nc;i++) sizes.push(base+(i<rem?1:0));
+    for(let s=0;s<nc*6;s++){
+      const i=(r()*nc)|0, j=(r()*nc)|0;
+      if(i!==j && sizes[i]>MIN_SEG){ sizes[i]--; sizes[j]++; }
+    }
+    return { path, dead, sizes, nc };
+  }
+
+  /* 해 개수 세기 (LIMIT 도달 시 조기 종료) — 난이도 검증용 */
+  function countSolutions(size, path, dead, sizes, nc, caps, LIMIT){
+    const n=size*size;
+    const color=new Int32Array(n).fill(-1);
+    const epOf=new Int32Array(n).fill(-1);
+    const A=[],B=[]; let idx=0;
+    for(let k=0;k<nc;k++){
+      const a=path[idx], b=path[idx+sizes[k]-1];
+      A.push(a); B.push(b); epOf[a]=k; epOf[b]=k; idx+=sizes[k];
+    }
+    for(const c of dead) color[c]=-2;
+    const need=path.length;
+    let filled=0, found=0, nodes=0;
+    const NODE_CAP=600000;
+    const NB=[]; for(let i=0;i<n;i++) NB.push(neighbors(i,size,size));
+
+    function prune(k, head){
+      const seen=new Uint8Array(n), st=[];
+      for(let i=0;i<n;i++){
+        if(color[i]!==-1||seen[i]) continue;
+        let hasEp=false, nearHead=false, hasTarget=false;
+        st.length=0; st.push(i); seen[i]=1;
+        while(st.length){
+          const c=st.pop();
+          if(epOf[c]>=k) hasEp=true;
+          if(c===B[k]) hasTarget=true;
+          for(const d of NB[c]){
+            if(color[d]===-1){ if(!seen[d]){ seen[d]=1; st.push(d); } }
+            else if(d===head) nearHead=true;
+          }
+        }
+        if(!hasEp) return false;
+        if(hasTarget && !nearHead) return false;
+      }
+      return true;
+    }
+    function dfs(k, head, len){
+      if(++nodes>NODE_CAP) return true;
+      if(head===B[k]){
+        if(k===nc-1){ if(filled===need) found++; return found>=LIMIT; }
+        const s=A[k+1]; color[s]=k+1; filled++;
+        const stop=dfs(k+1,s,1);
+        color[s]=-1; filled--;
+        return stop;
+      }
+      if(caps && len>=caps[k]) return false;
+      if(!prune(k,head)) return false;
+      for(const d of NB[head]){
+        if(color[d]!==-1) continue;
+        if(epOf[d]>=0 && d!==B[k]) continue;
+        color[d]=k; filled++;
+        const stop=dfs(k,d,len+1);
+        color[d]=-1; filled--;
+        if(stop) return true;
+      }
+      return false;
+    }
+    const s0=A[0]; color[s0]=0; filled=1;
+    dfs(0,s0,1);
+    return { count:found, overflow:nodes>NODE_CAP };
+  }
+
+  function genPuzzle(size,colors,seed,opts){
+    opts=opts||{};
+    const holes=opts.holes|0, slack=(opts.slack==null?null:opts.slack|0);
+    const seeded = seed!=null;
+    let pick=null, r=null;
+
+    for(let t=0;t<MAX_TRIES;t++){
+      r = seeded ? mulberry32((seed+t*0x9E3779B1)>>>0) : Math.random;
+      const d = drawBoard(size, colors, holes, r);
+      if(!d) continue;
+      if(slack==null){ pick=d; break; }                  // 검증 없이 사용 (온보딩 기본판)
+      const caps=d.sizes.map(v=>v+slack);
+      const lo=countSolutions(size,d.path,d.dead,d.sizes,d.nc,caps,SOL_MIN);
+      if(lo.overflow || lo.count<SOL_MIN) continue;       // 너무 빡빡하거나 못 셈
+      const hi=countSolutions(size,d.path,d.dead,d.sizes,d.nc,caps,SOL_MAX+1);
+      if(hi.overflow || hi.count>SOL_MAX) continue;       // 너무 헐렁함
+      pick=d; break;
+    }
+    if(!pick){                                            // 최후 안전망 : 제약 없이
+      r = seeded ? mulberry32(seed>>>0) : Math.random;
+      pick = drawBoard(size, colors, 0, r) || drawBoard(size, colors, 0, mulberry32(1));
+    }
+
+    W=H=size; N=W*H;
+    const { path, dead, sizes, nc } = pick;
+    numColors=nc;
     cellColor=new Int32Array(N).fill(-1);
     endpointOf=new Int32Array(N).fill(-1);
+    deadCell=new Uint8Array(N);
+    for(const c of dead) deadCell[c]=1;
+    capOf=new Int32Array(numColors);
     colorPaths=[]; colorDone=[];
     let idx=0;
     for(let ci=0;ci<numColors;ci++){
       const len=sizes[ci];
       endpointOf[path[idx]]=ci;
       endpointOf[path[idx+len-1]]=ci;
+      capOf[ci] = (slack==null) ? 0 : len+slack;          // 0 = 상한 없음
       colorPaths.push([]); colorDone.push(false);
       idx+=len;
     }
+    fillTarget = path.length;                             // 채워야 하는 칸 수
     buildBoard();
     render(); updateHud();
   }
@@ -926,7 +1060,7 @@
     cellEls=[];
     for(let i=0;i<N;i++){
       const d=document.createElement('div');
-      d.className='cell';
+      d.className = (deadCell && deadCell[i]) ? 'cell dead' : 'cell';
       board.insertBefore(d, document.getElementById('overlay'));
       cellEls.push(d);
     }
@@ -966,7 +1100,12 @@
       const ep=endpointOf[i];
       if(ep>=0){
         const hex=PAL[ep], done=colorDone[ep];
-        html+=`<span class="term${done?' done':''}" style="background:${hex}"></span>`;
+        let n='';
+        if(capOf && capOf[ep]>0 && !done){                 // 남은 배선 칸수
+          const used=colorPaths[ep].length||1;
+          n='<i>'+Math.max(0, capOf[ep]-used)+'</i>';
+        }
+        html+=`<span class="term${done?' done':''}" style="background:${hex}">${n}</span>`;
       }
       el.innerHTML=html;
     }
@@ -974,11 +1113,10 @@
 
   const el=id=>document.getElementById(id);
   function setHint(){
-    el('hint').innerHTML = inPlay
-      ? '현장을 떠나도 시간은 흐릅니다 · 수리 완료 시 +'+PAY+'원, 재출동 없음'
-      : stage===1
-        ? '같은 색 <b class="em-brand">단자 두 개</b>를 손가락으로 이어보세요'
-        : '같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성';
+    if(inPlay){ el('hint').innerHTML='현장을 떠나도 시간은 흐릅니다 · 수리 완료 시 +'+PAY+'원, 재출동 없음'; return; }
+    const p=params(stage);
+    el('hint').innerHTML = (p && p.tip) ? p.tip
+      : '단자의 숫자만큼만 늘릴 수 있어요 · 빈칸을 모두 채우면 수리 완료';
   }
   function updateHud(){
     recomputeDone();
@@ -986,7 +1124,7 @@
     let filled=0; for(let i=0;i<N;i++) if(cellColor[i]>=0) filled++;
     el('conn').textContent=done;
     el('total').textContent=numColors;
-    el('fill').innerHTML=Math.round(filled/N*100)+'<small>%</small>';
+    el('fill').innerHTML=Math.round(filled/(fillTarget||N)*100)+'<small>%</small>';
     el('bar').style.width=(done/numColors*100)+'%';
 
     const s1=el('stage'), s3=el('points');
@@ -1026,6 +1164,8 @@
     if(p.length>=2 && target===p[p.length-2]){ cellColor[p.pop()]=-1; render(); updateHud(); return; }
     const inIdx=p.indexOf(target);
     if(inIdx>=0){ for(let x=p.length-1;x>inIdx;x--) cellColor[p[x]]=-1; colorPaths[k]=p.slice(0,inIdx+1); render(); return; }
+    if(deadCell[target]) return;                                                 // 탄 자리 통과 불가
+    if(capOf[k]>0 && p.length>=capOf[k]){ bumpCap(); return; }                    // 배선 상한
     const tEp=endpointOf[target];
     if(tEp>=0 && tEp!==k) return;                 // 다른 색 단자는 통과 불가
     const tc=cellColor[target];
@@ -1034,6 +1174,11 @@
     render(); updateHud(); checkWin();
   }
 
+  let bumpT=null;
+  function bumpCap(){                              // 상한 도달 시 보드를 살짝 흔들어 알림
+    board.classList.add('bump');
+    clearTimeout(bumpT); bumpT=setTimeout(()=>board.classList.remove('bump'), 240);
+  }
   function cellAt(e){
     const rect=board.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;
@@ -1079,13 +1224,15 @@
   let onboardSnap=null;      // 탭 이동 시 온보딩 판 보존
 
   function snapshot(){
-    return { W,H,N,numColors, stage,
+    return { W,H,N,numColors, stage, fillTarget,
              cellColor:Int32Array.from(cellColor), endpointOf:Int32Array.from(endpointOf),
+             deadCell:Uint8Array.from(deadCell), capOf:Int32Array.from(capOf),
              colorPaths:colorPaths.map(p=>p.slice()) };
   }
   function restore(s){
-    W=s.W; H=s.H; N=s.N; numColors=s.numColors; stage=s.stage;
+    W=s.W; H=s.H; N=s.N; numColors=s.numColors; stage=s.stage; fillTarget=s.fillTarget;
     cellColor=Int32Array.from(s.cellColor); endpointOf=Int32Array.from(s.endpointOf);
+    deadCell=Uint8Array.from(s.deadCell); capOf=Int32Array.from(s.capOf);
     colorPaths=s.colorPaths.map(p=>p.slice()); colorDone=new Array(numColors).fill(false);
     buildBoard(); render(); updateHud();
   }
@@ -1119,7 +1266,7 @@
     el('playbar').classList.remove('on');
     el('controls').classList.remove('solo');
     showView('game'); renderTabs();
-    if(onboardSnap) restore(onboardSnap); else { const p=params(stage); genPuzzle(p.size,p.colors); }
+    if(onboardSnap) restore(onboardSnap); else { const p=params(stage); genPuzzle(p.size,p.colors,null,p); }
     setHint();
   }
   function goLobby(){
@@ -1211,7 +1358,7 @@
       return '<button class="ch-card'+(done?' cleared':'')+(inProg?' prog':'')+'" data-i="'+i+'">'+
         '<span class="no">'+(done?'✓':(i+1))+'</span>'+
         '<span><span class="nm">'+c.name+'</span>'+
-          '<span class="mt">'+c.tag+' · '+c.size+'×'+c.size+'</span>'+
+          '<span class="mt">'+c.tag+' · '+c.size+'×'+c.size+' · 탄 자리 '+c.holes+'</span>'+
           '<span class="rc" id="rc'+i+'">'+info+'</span></span>'+
         '<span class="go">'+(done?'🏆':'▶')+'</span></button>';
     }).join('');
@@ -1249,7 +1396,7 @@
     el('controls').classList.add('solo');                        // 챌린지엔 '새 판' 없음
     showView('game'); renderTabs();
 
-    genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i));      // 날짜+번호 시드 = 모두 같은 문제
+    genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i), c);   // 날짜+번호 시드 = 모두 같은 문제
     restoreProgress(rec[i]);
     startTimer(rec[i].start);
   }
@@ -1367,7 +1514,8 @@
   function checkWin(){
     recomputeDone();
     for(let k=0;k<numColors;k++) if(!colorDone[k]) return;
-    for(let i=0;i<N;i++) if(cellColor[i]<0) return;   // 모든 칸 채움 필요
+    let f=0; for(let i=0;i<N;i++) if(cellColor[i]>=0) f++;
+    if(f<fillTarget) return;                          // 탄 자리를 뺀 모든 칸을 채워야 함
     win();
   }
   function setOverlay(o){
@@ -1424,13 +1572,15 @@
   }
 
   function nextStage(){ overlay.classList.remove('show'); stage++; onboardSnap=null;
-    const p=params(stage); genPuzzle(p.size,p.colors); setHint(); }
+    const p=params(stage); genPuzzle(p.size,p.colors,null,p); setHint(); }
   function resetOnboard(){ overlay.classList.remove('show'); stage=1; onboardSnap=null;
-    const p=params(1); genPuzzle(p.size,p.colors); setHint(); }
+    const p=params(1); genPuzzle(p.size,p.colors,null,p); setHint(); }
   function params(s){
     if(s<=ONBOARD_LEN) return ONBOARD_STEPS[s-1];
-    const k=s-ONBOARD_LEN;                     // 온보딩 이후 = 무보상 연습, 계속 커짐
-    return { size:Math.min(10, 7+Math.floor(k/2)), colors:Math.min(PAL.length, 6+Math.floor(k/2)) };
+    const k=s-ONBOARD_LEN;                     // 교육 이후 = 무보상 연습, 조금씩 어려워짐
+    return { size:Math.min(8, 7+Math.floor(k/3)),
+             colors:Math.min(PAL.length, 6+Math.floor(k/3)),
+             holes:Math.min(8, 4+k), slack:Math.max(2, 4-Math.floor(k/2)) };
   }
 
   /* ===== 실제 앱 연동 지점 =====
@@ -1443,7 +1593,7 @@
 
   /* ================= 버튼 배선 ================= */
   el('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); saveProgress(); };
-  el('newp').onclick=()=>{ const p=params(stage); genPuzzle(p.size,p.colors); };   // 온보딩 전용
+  el('newp').onclick=()=>{ const p=params(stage); genPuzzle(p.size,p.colors,null,p); };   // 교육 전용
   el('back').onclick=goLobby;
   el('tab-onboard').onclick=goOnboard;
   el('tab-challenge').onclick=goLobby;
@@ -1499,7 +1649,7 @@
   } else {
     stage=Math.max(1, Math.min(ONBOARD_LEN, store.maxStage||1));
     renderTabs();
-    const p0=params(stage); genPuzzle(p0.size,p0.colors); setHint();
+    const p0=params(stage); genPuzzle(p0.size,p0.colors,null,p0); setHint();
     if(!store.seenTut) openTut();             // 첫 판에는 가이드부터
   }
 })();
