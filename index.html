@@ -629,7 +629,8 @@
         <p>· 동점일 경우 <em>먼저 도달한 정비사</em>가 상위입니다.<br>
            · 정비 요청은 <em>매일 자정에 3건</em>이 새로 배정됩니다.<br>
            · 같은 날 모든 정비사에게 <em>동일한 고장</em>이 배정되므로 기록 비교가 공정합니다.<br>
-           · 한 번 수리를 완료한 충전기는 그날 다시 출동할 수 없습니다.</p>
+           · 한 번 수리를 완료한 충전기는 그날 다시 출동할 수 없습니다.<br>
+           · 현장을 벗어나도 시간은 흐르지만 <em>최대 30초</em>까지만 가산됩니다.</p>
       </div>
     </div>
 
@@ -1045,7 +1046,7 @@
 
   const el=id=>document.getElementById(id);
   function setHint(){
-    if(inPlay){ el('hint').innerHTML='나가도 시간은 흐름 · 완료 +'+PAY+'P · 재출동 없음'; return; }
+    if(inPlay){ el('hint').innerHTML='나가면 최대 30초만 가산 · 완료 +'+PAY+'P'; return; }
     const p=params(stage);
     el('hint').innerHTML = (p && p.tip) ? p.tip
       : '단자 숫자만큼만 연장 가능 · 빈칸을 모두 채우면 완료';
@@ -1106,6 +1107,12 @@
     render(); updateHud(); checkWin();
   }
 
+  let awayT=null;
+  function awayNotice(ms){                        // 왜 시간이 늘었는지 알려준다
+    const s=Math.round(ms/1000);
+    el('hint').innerHTML='자리비움 <b>+'+s+'초</b> 가산 · 최대 '+(AWAY_MAX/1000)+'초까지만 반영돼요';
+    clearTimeout(awayT); awayT=setTimeout(setHint, 4000);
+  }
   let bumpT=null;
   function bumpCap(){                              // 상한 도달 시 보드를 살짝 흔들어 알림
     board.classList.add('bump');
@@ -1170,13 +1177,36 @@
   }
 
   /* ---------- 타이머 : 판이 열리는 순간부터 카운트 ---------- */
-  let chStart=0, chTick=null, chRunning=false, chFinal=0;
-  function elapsed(){ return chRunning ? Date.now()-chStart : chFinal; }
-  function startTimer(fromTs){               // 이어서 풀기면 최초 입장 시각을 그대로 이어받음
-    chStart=fromTs||Date.now(); chFinal=0; chRunning=true;
+  const AWAY_MAX=30000;                      // 자리를 비워도 최대 30초까지만 가산 (이탈 1회당)
+  let chStart=0, chBase=0, chTick=null, chRunning=false, chFinal=0;
+  function elapsed(){ return chRunning ? chBase+(Date.now()-chStart) : chFinal; }
+  function startTimer(baseMs){               // baseMs = 지금까지 누적된 정비 시간
+    chBase=baseMs||0; chStart=Date.now(); chFinal=chBase; chRunning=true;
     clearInterval(chTick); chTick=setInterval(updateHud,100); updateHud();
   }
-  function stopTimer(){ if(chRunning) chFinal=Date.now()-chStart; chRunning=false; clearInterval(chTick); chTick=null; }
+  function stopTimer(){ if(chRunning) chFinal=chBase+(Date.now()-chStart); chRunning=false; clearInterval(chTick); chTick=null; }
+
+  /* 예전 저장본(start 기준)을 누적 방식으로 옮긴다 */
+  function normRec(r){
+    if(r && r.acc==null){ r.acc = r.start ? Math.max(0, Date.now()-r.start) : 0;
+                          r.leftAt = Date.now(); delete r.start; }
+    return r;
+  }
+  /* 목록에 보여줄 경과 시간 : 자리비움은 30초까지만 흐르고 멈춘다 */
+  function runMs(r){
+    normRec(r);
+    return r.acc + (r.leftAt ? Math.min(Date.now()-r.leftAt, AWAY_MAX) : 0);
+  }
+  /* 복귀 : 비운 시간을 30초까지만 더하고 타이머 재개. 더해진 ms 를 돌려준다 */
+  function resumeRun(){
+    const r=todayRec()[chIndex];
+    if(!r || r.ms!=null) return 0;
+    normRec(r);
+    let away=0;
+    if(r.leftAt){ away=Math.min(Date.now()-r.leftAt, AWAY_MAX); r.acc+=away; r.leftAt=null; persist(); }
+    startTimer(r.acc);
+    return away;
+  }
 
   /* ---------- 탭 ---------- */
   function renderTabs(){
@@ -1193,7 +1223,7 @@
   }
 
   function goOnboard(){
-    saveProgress(); stopTimer(); stopLobbyTick();
+    saveProgress(true); stopTimer(); stopLobbyTick();
     mode='onboard'; inPlay=false; chIndex=-1;
     el('playbar').classList.remove('on');
     el('controls').classList.remove('solo');
@@ -1203,7 +1233,7 @@
   }
   function goLobby(){
     if(mode==='onboard') onboardSnap=snapshot();
-    saveProgress(); stopTimer();               // 나가도 start 시각은 유지 → 타이머 계속
+    saveProgress(true); stopTimer();           // 이탈 시각 기록 → 복귀 시 최대 30초만 가산
     mode='challenge'; inPlay=false; chIndex=-1;
     el('playbar').classList.remove('on');
     el('controls').classList.remove('solo');
@@ -1219,7 +1249,7 @@
       CHALLENGES.forEach((c,i)=>{
         const r=rec[i]; if(!r || r.ms!=null) return;
         const n=el('rc'+i);
-        if(n) n.innerHTML='<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서';
+        if(n) n.innerHTML='<u>수리 중</u> <b>'+fmt(runMs(r))+'</b> · 이어서';
       });
     }, 200);
   }
@@ -1285,7 +1315,7 @@
       const done   = !!(r && r.ms!=null);
       const inProg = !!(r && r.ms==null);
       const info = done   ? '<b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i> · <s>+'+(r.got||PAY)+'P</s>'
-                 : inProg ? '<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서'
+                 : inProg ? '<u>수리 중</u> <b>'+fmt(runMs(r))+'</b> · 이어서'
                  : '미출동 · 연결시 +'+PAY+'P';
       return '<button class="ch-card'+(done?' cleared':'')+(inProg?' prog':'')+'" data-i="'+i+'">'+
         '<span class="no">'+(done?'✓':(i+1))+'</span>'+
@@ -1319,7 +1349,8 @@
     mode='challenge'; chIndex=i; inPlay=true;
     const c=CHALLENGES[i];
 
-    if(!rec[i]) rec[i]={ start:Date.now(), ms:null, paid:false, paths:null };
+    if(!rec[i]) rec[i]={ acc:0, leftAt:null, ms:null, paid:false, part:0, paths:null };
+    else normRec(rec[i]);
     persist();
 
     el('playbar').classList.add('on');
@@ -1330,7 +1361,8 @@
 
     genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i), c);   // 날짜+번호 시드 = 모두 같은 문제
     restoreProgress(rec[i]);
-    startTimer(rec[i].start);
+    const away=resumeRun();
+    if(away>=1000) awayNotice(away);
   }
 
   /* 이어서 풀기 : 그려둔 선 복원 */
@@ -1341,11 +1373,14 @@
     colorPaths.forEach((p,k)=>p.forEach(c=>{ if(c>=0&&c<N) cellColor[c]=k; }));
     render(); updateHud();
   }
-  function saveProgress(){
+  function saveProgress(pausing){
     if(!inPlay) return;
     const r=todayRec()[chIndex];
     if(!r || r.ms!=null) return;
     r.paths=colorPaths.map(p=>Array.from(p));
+    normRec(r);
+    r.acc=elapsed();
+    if(pausing) r.leftAt=Date.now();          // 여기서부터는 30초까지만 가산
     checkPartial(r);
     persist();
   }
@@ -1583,8 +1618,11 @@
       goLobby();
     };
   }
-  window.addEventListener('pagehide', saveProgress);
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveProgress(); });
+  window.addEventListener('pagehide', ()=>saveProgress(true));
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){ saveProgress(true); stopTimer(); }
+    else if(inPlay){ const a=resumeRun(); if(a>=1000) awayNotice(a); }
+  });
 
   /* ================= 초기화 ================= */
   ensureSeason();                               // 달이 바뀌었으면 이전 시즌 정산
