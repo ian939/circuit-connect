@@ -107,6 +107,34 @@
   .view.on{display:block;}
 
   /* ---------- 챌린지 로비 ---------- */
+  .controls.solo #newp{display:none;}          /* 챌린지엔 '새 판' 없음 — 타이머 리셋 어뷰징 차단 */
+
+  /* ---------- 적립 현황 ---------- */
+  .wallet{display:flex;justify-content:space-between;align-items:flex-end;
+    background:linear-gradient(180deg,#2A2952,#1B1A38);border:1px solid var(--line);
+    border-radius:16px;padding:13px 15px;margin-bottom:9px;
+    box-shadow:inset 0 1px 0 #ffffff10,0 6px 18px #0004;}
+  .wallet .wk{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+    color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px;}
+  .wallet .wv{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:700;
+    color:var(--amber);line-height:1;text-shadow:0 0 20px #FFB84D44;}
+  .wallet .wv small{font-size:13px;}
+  .wallet .wmax{font-size:12px;color:var(--muted2);font-weight:500;text-shadow:none;}
+  .wallet .wr{text-align:right;}
+  .wallet .wv2{font-family:"IBM Plex Mono",monospace;font-size:16px;font-weight:700;color:var(--ink);}
+  .wallet .wv2 small{font-size:11px;color:var(--muted);}
+
+  .quota{display:flex;align-items:center;gap:6px;margin:0 4px 12px;
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted2);letter-spacing:.06em;}
+  .quota i{width:22px;height:5px;border-radius:3px;background:var(--slot);display:block;}
+  .quota i.on{background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+  .quota span{margin-left:4px;}
+
+  .alldone{background:#41E6E00f;border:1px solid #41E6E033;border-radius:14px;
+    padding:13px;text-align:center;font-size:12.5px;color:var(--ink);margin-bottom:10px;line-height:1.6;}
+  .alldone b{color:var(--amber);font-family:"IBM Plex Mono",monospace;}
+  .alldone span{color:var(--muted);font-size:11.5px;}
+
   .lobby-head{display:flex;justify-content:space-between;align-items:baseline;
     margin:2px 3px 11px;font-family:"IBM Plex Mono",monospace;}
   .lobby-head .d{font-size:13px;color:var(--cyan);font-weight:600;letter-spacing:.07em;}
@@ -131,6 +159,11 @@
   .ch-card .rc{font-size:11.5px;font-family:"IBM Plex Mono",monospace;margin-top:5px;color:var(--muted2);}
   .ch-card .rc b{color:var(--cyan);font-weight:600;}
   .ch-card .rc i{color:var(--amber);font-style:normal;font-weight:700;}
+  .ch-card .rc u{color:var(--amber);text-decoration:none;font-weight:600;}
+  .ch-card .rc s{color:var(--muted2);text-decoration:none;}
+  .ch-card.cleared{opacity:.72;}
+  .ch-card.prog{border-color:#FFB84D66;}
+  .ch-card.prog .no{color:var(--amber);border-color:#FFB84D44;}
   .ch-card .go{font-size:17px;color:var(--muted2);padding-right:2px;}
 
   .locked{background:linear-gradient(180deg,var(--panel),#171633);border:1px dashed var(--line);
@@ -231,7 +264,7 @@
     <div class="stats">
       <div class="stat"><div class="k" id="k1">Stage</div><div class="v" id="stage">1</div></div>
       <div class="stat"><div class="k">채움</div><div class="v" id="fill">0<small style="font-size:11px">%</small></div></div>
-      <div class="stat pt"><div class="k" id="k3">적립 포인트</div><div class="v" id="points">0<small>P</small></div></div>
+      <div class="stat pt"><div class="k" id="k3">적립 충전금</div><div class="v" id="points">0<small>원</small></div></div>
     </div>
   </div>
 
@@ -250,7 +283,7 @@
     </div>
   </div>
 
-  <div class="controls">
+  <div class="controls" id="controls">
     <button class="btn" id="clear">
       <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       지우기
@@ -283,7 +316,7 @@
   const board=document.getElementById('board');
 
   let W,H,N, cellColor, endpointOf, colorPaths, colorDone, numColors;
-  let cellEls=[], stage=1, points=0;
+  let cellEls=[], stage=1;
   let drawing=false, active=-1;
 
   /* ================= 챌린지 설정 ================= */
@@ -295,7 +328,10 @@
     { name:'러시아워', size:7, colors:6, base: 96000 },
     { name:'과부하',   size:8, colors:8, base:165000 },
   ];
-  const RANK_P=[500,380,300,250,210,180,150,120,100,80];   // 순위별 첫 완주 보너스
+  const PAY=10;                               // 1판 = 10원 (충전 포인트)
+  /* 적립 규칙
+     - 온보딩: 각 단계 최초 클리어 1회만 지급 (10단계 = 100원, 반복 파밍 불가)
+     - 챌린지: 하루 3판 × 10원 = 30원. 완주하면 그날은 재참여 불가        */
 
   /* ---------- 시드 난수 : 같은 날 = 같은 문제 = 공정한 랭킹 ---------- */
   function hashStr(s){
@@ -314,8 +350,9 @@
   let rnd=Math.random;                        // genPuzzle 이 시드에 따라 교체
 
   /* ---------- 저장 ---------- */
-  const KEY='circuit-connect.v1';
-  let store={ maxStage:1, points:0, unlocked:false, daily:{} };
+  const KEY='circuit-connect.v2';
+  // paidStage: 여기까지의 온보딩 단계는 이미 적립됨 → '처음부터'로 재클리어해도 재지급 없음
+  let store={ maxStage:1, won:0, paidStage:0, unlocked:false, daily:{} };
   try{ const raw=localStorage.getItem(KEY); if(raw) store=Object.assign(store, JSON.parse(raw)||{}); }catch(e){}
   function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
 
@@ -330,7 +367,9 @@
     if(!store.daily[t]) store.daily[t]={};
     return store.daily[t];
   }
-  function myBest(ci){ const r=todayRec()[ci]; return r? r.ms : null; }
+  function myBest(ci){ const r=todayRec()[ci]; return (r && r.ms!=null) ? r.ms : null; }
+  function doneCount(){ const r=todayRec(); return CHALLENGES.filter((c,i)=>r[i] && r[i].ms!=null).length; }
+  function wonToday(){ return doneCount()*PAY; }
 
   /* ---------- 시간 표기 ---------- */
   function fmt(ms){
@@ -487,8 +526,8 @@
       el('k1').textContent='Stage';
       s1.className = stage<=ONBOARD_LEN ? 'v sm' : 'v';
       s1.textContent = stage<=ONBOARD_LEN ? stage+' / '+ONBOARD_LEN : String(stage);
-      el('k3').textContent='적립 포인트'; s3.className='v';
-      s3.innerHTML=points.toLocaleString()+'<small>P</small>';
+      el('k3').textContent='적립 충전금'; s3.className='v';
+      s3.innerHTML=store.won.toLocaleString()+'<small>원</small>';
     }
   }
 
@@ -556,7 +595,10 @@
     if(!drawing) return; e.preventDefault();
     const cell=cellAt(e); if(cell!=null) step(cell);
   },{passive:false});
-  window.addEventListener('pointerup',()=>{ drawing=false; active=-1; });
+  window.addEventListener('pointerup',()=>{
+    if(drawing) saveProgress();          // 이어서 풀기용 진행 상황 저장
+    drawing=false; active=-1;
+  });
 
   /* ================= 모드 / 화면 전환 ================= */
   const overlay=el('overlay');
@@ -580,8 +622,8 @@
   /* ---------- 타이머 : 판이 열리는 순간부터 카운트 ---------- */
   let chStart=0, chTick=null, chRunning=false, chFinal=0;
   function elapsed(){ return chRunning ? Date.now()-chStart : chFinal; }
-  function startTimer(){
-    chStart=Date.now(); chFinal=0; chRunning=true;
+  function startTimer(fromTs){               // 이어서 풀기면 최초 입장 시각을 그대로 이어받음
+    chStart=fromTs||Date.now(); chFinal=0; chRunning=true;
     clearInterval(chTick); chTick=setInterval(updateHud,100); updateHud();
   }
   function stopTimer(){ if(chRunning) chFinal=Date.now()-chStart; chRunning=false; clearInterval(chTick); chTick=null; }
@@ -604,20 +646,38 @@
   }
 
   function goOnboard(){
-    stopTimer(); mode='onboard'; inPlay=false; chIndex=-1;
+    saveProgress(); stopTimer(); stopLobbyTick();
+    mode='onboard'; inPlay=false; chIndex=-1;
     el('playbar').classList.remove('on');
-    el('newp').innerHTML=NEWP_HTML;
+    el('controls').classList.remove('solo');
     el('hint').textContent='같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성';
     showView('game'); renderTabs();
     if(onboardSnap) restore(onboardSnap); else { const p=params(stage); genPuzzle(p.size,p.colors); }
   }
   function goLobby(){
     if(mode==='onboard') onboardSnap=snapshot();
-    stopTimer(); mode='challenge'; inPlay=false; chIndex=-1;
-    showView('lobby'); renderTabs(); renderLobby();
+    saveProgress(); stopTimer();               // 나가도 start 시각은 유지 → 타이머 계속
+    mode='challenge'; inPlay=false; chIndex=-1;
+    el('playbar').classList.remove('on');
+    el('controls').classList.remove('solo');
+    showView('lobby'); renderTabs(); renderLobby(); startLobbyTick();
   }
 
   /* ---------- 로비 ---------- */
+  let lobbyTick=null;
+  function startLobbyTick(){                 // 진행 중인 판의 경과 시간만 갱신
+    clearInterval(lobbyTick);
+    lobbyTick=setInterval(()=>{
+      const rec=todayRec();
+      CHALLENGES.forEach((c,i)=>{
+        const r=rec[i]; if(!r || r.ms!=null) return;
+        const n=el('rc'+i);
+        if(n) n.innerHTML='<u>진행 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 풀기';
+      });
+    }, 200);
+  }
+  function stopLobbyTick(){ clearInterval(lobbyTick); lobbyTick=null; }
+
   function renderLobby(){
     const d=new Date();
     el('ch-date').textContent=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
@@ -629,44 +689,92 @@
         '<div class="locked">'+
           '<div class="ico">🔒</div>'+
           '<h3>온보딩 '+ONBOARD_LEN+'단계를 먼저 통과하세요</h3>'+
-          '<p>온보딩을 끝내면 매일 3개의 챌린지가 열립니다.<br>가장 빨리 푼 순서대로 랭킹이 매겨져요.</p>'+
+          '<p>온보딩을 끝내면 매일 3판이 열립니다.<br>1판당 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.</p>'+
           '<div class="lbar"><i style="width:'+(cur/ONBOARD_LEN*100)+'%"></i></div>'+
           '<div class="lnum">'+cur+' / '+ONBOARD_LEN+' 단계</div>'+
         '</div>';
       return;
     }
 
-    const rec=todayRec();
-    list.innerHTML=CHALLENGES.map((c,i)=>{
-      const r=rec[i], done=!!r;
-      const info = done
-        ? '내 기록 <b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i>'
-        : '기록 없음 · 열면 바로 시간 카운트';
-      return '<button class="ch-card'+(done?' cleared':'')+'" data-i="'+i+'">'+
+    const rec=todayRec(), nDone=doneCount(), allDone=nDone===CHALLENGES.length;
+
+    let html=
+      '<div class="wallet">'+
+        '<div><span class="wk">오늘 적립</span>'+
+          '<span class="wv">'+wonToday()+'<small>원</small>'+
+          '<span class="wmax"> / '+(CHALLENGES.length*PAY)+'원</span></span></div>'+
+        '<div class="wr"><span class="wk">누적</span>'+
+          '<span class="wv2">'+store.won.toLocaleString()+'<small>원</small></span></div>'+
+      '</div>'+
+      '<div class="quota">'+
+        CHALLENGES.map((c,i)=>'<i class="'+((rec[i]&&rec[i].ms!=null)?'on':'')+'"></i>').join('')+
+        '<span>오늘 '+nDone+' / '+CHALLENGES.length+'판 완료</span>'+
+      '</div>';
+
+    html+=CHALLENGES.map((c,i)=>{
+      const r=rec[i];
+      const done   = !!(r && r.ms!=null);
+      const inProg = !!(r && r.ms==null);
+      const info = done   ? '내 기록 <b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i> · <s>+'+PAY+'원 적립됨</s>'
+                 : inProg ? '<u>진행 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 풀기'
+                 : '미도전 · 열면 바로 시간 카운트 · +'+PAY+'원';
+      return '<button class="ch-card'+(done?' cleared':'')+(inProg?' prog':'')+'" data-i="'+i+'">'+
         '<span class="no">'+(done?'✓':(i+1))+'</span>'+
         '<span><span class="nm">'+c.name+'</span>'+
           '<span class="mt">'+c.size+'×'+c.size+' · '+c.colors+'색</span>'+
-          '<span class="rc">'+info+'</span></span>'+
-        '<span class="go">'+(done?'⟳':'▶')+'</span></button>';
-    }).join('')+
-    '<button class="btn" id="see-rank" style="width:100%;margin-top:4px">🏆 오늘의 랭킹 보기</button>';
+          '<span class="rc" id="rc'+i+'">'+info+'</span></span>'+
+        '<span class="go">'+(done?'🏆':'▶')+'</span></button>';
+    }).join('');
 
-    list.querySelectorAll('.ch-card').forEach(b=>b.onclick=()=>startChallenge(+b.dataset.i));
+    if(allDone) html+='<div class="alldone">오늘 '+CHALLENGES.length+'판을 모두 완료했어요 · '+
+      '<b>'+wonToday()+'원</b> 적립<br><span>내일 자정에 새 챌린지 3판이 열립니다</span></div>';
+
+    html+='<button class="btn" id="see-rank" style="width:100%;margin-top:4px">🏆 오늘의 랭킹 보기</button>';
+    list.innerHTML=html;
+
+    list.querySelectorAll('.ch-card').forEach(b=>{
+      const i=+b.dataset.i, r=rec[i];
+      b.onclick = (r && r.ms!=null) ? (()=>openRank(i)) : (()=>openChallenge(i));   // 완주 후엔 랭킹만
+    });
     el('see-rank').onclick=()=>openRank(0);
   }
 
-  /* ---------- 챌린지 시작 ---------- */
-  function startChallenge(i){
+  /* ---------- 챌린지 입장 (신규 / 이어서) ---------- */
+  function openChallenge(i){
+    const rec=todayRec();
+    if(rec[i] && rec[i].ms!=null){ openRank(i); return; }        // 재참여 차단
+    stopLobbyTick();
     mode='challenge'; chIndex=i; inPlay=true;
     const c=CHALLENGES[i];
+
+    if(!rec[i]) rec[i]={ start:Date.now(), ms:null, paid:false, paths:null };
+    persist();
+
     el('playbar').classList.add('on');
     el('play-title').textContent='Challenge '+(i+1)+' · '+c.name;
-    el('newp').innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 1 0-.9 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>다시 시작';
-    el('hint').textContent='판이 열린 순간부터 시간이 흐릅니다 · 최단 기록으로 랭킹';
+    el('hint').textContent='나가도 시간은 계속 흐릅니다 · 완주하면 +'+PAY+'원, 재도전 없음';
+    el('controls').classList.add('solo');                        // 챌린지엔 '새 판' 없음
     showView('game'); renderTabs();
-    // 날짜+번호 시드 → 같은 날엔 누구나 똑같은 문제
-    genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i));
-    startTimer();
+
+    genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i));      // 날짜+번호 시드 = 모두 같은 문제
+    restoreProgress(rec[i]);
+    startTimer(rec[i].start);
+  }
+
+  /* 이어서 풀기 : 그려둔 선 복원 */
+  function restoreProgress(r){
+    if(!r.paths || r.paths.length!==numColors) return;
+    colorPaths=r.paths.map(p=>p.slice());
+    cellColor.fill(-1);
+    colorPaths.forEach((p,k)=>p.forEach(c=>{ if(c>=0&&c<N) cellColor[c]=k; }));
+    render(); updateHud();
+  }
+  function saveProgress(){
+    if(!inPlay) return;
+    const r=todayRec()[chIndex];
+    if(!r || r.ms!=null) return;
+    r.paths=colorPaths.map(p=>Array.from(p));
+    persist();
   }
 
   /* ---------- 랭킹 시트 ---------- */
@@ -709,48 +817,45 @@
   function win(){ inPlay ? winChallenge() : winOnboard(); }
 
   function winOnboard(){
-    const reward=W*numColors*3;
-    points+=reward; store.points=points;
+    // 각 단계 최초 클리어에만 지급 → '처음부터'로 되돌려도 재지급 없음
+    const paid = (stage<=ONBOARD_LEN && stage>store.paidStage);
+    if(paid){ store.paidStage=stage; store.won+=PAY; }
     if(stage+1>store.maxStage) store.maxStage=stage+1;
     const justUnlocked = (stage>=ONBOARD_LEN && !store.unlocked);
     if(justUnlocked) store.unlocked=true;
-    persist(); awardPoints(reward); updateHud(); renderTabs();
+    persist(); if(paid) awardPoints(PAY,'onboarding-'+stage); updateHud(); renderTabs();
 
+    const rw = paid ? '+'+PAY+'<span class="p">원</span>'
+                    : '<span style="color:#8785BE">연습</span>';
     if(justUnlocked){
-      setOverlay({ big:'온보딩 완료', head:'챌린지 해금!', reward:'+'+reward+'<span class="p">P</span>',
-        desc:'매일 3개의 챌린지가 열립니다.<br>가장 빨리 푼 순서대로 랭킹이 매겨져요.',
-        left:{t:'계속 연습', fn:nextStage},
+      setOverlay({ big:'온보딩 완료', head:'데일리 챌린지 해금!', reward:rw,
+        desc:'이제 <b>매일 3판</b>이 열립니다.<br>완주할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
+        left:{t:'연습 계속', fn:nextStage},
         right:{t:'챌린지 보기', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
     } else {
-      setOverlay({ big:'회로 완성', head:'STAGE '+stage+' CLEAR', reward:'+'+reward+'<span class="p">P</span>',
-        desc:'모든 회로가 연결됐어요. 충전 포인트가 적립됐습니다.',
+      setOverlay({ big:'회로 완성', head:'STAGE '+stage+' CLEAR', reward:rw,
+        desc: paid ? '충전 포인트 '+PAY+'원이 적립됐습니다.<br>누적 <b>'+store.won.toLocaleString()+'원</b>'
+                   : '이미 적립한 단계라 이번엔 지급되지 않아요.',
         left:{t:'처음부터', fn:resetOnboard}, right:{t:'다음 스테이지', fn:nextStage} });
     }
   }
 
   function winChallenge(){
     stopTimer();
-    const ms=chFinal, rec=todayRec(), prev=rec[chIndex];
-    const improved = !prev || ms<prev.ms;
-    const best = improved ? ms : prev.ms;
-    rec[chIndex]={ ms:best, rewarded: prev ? prev.rewarded : false };
-
-    let reward=0;
-    if(!rec[chIndex].rewarded){                       // 그날 첫 완주에만 순위 보너스
-      const rk=myRank(chIndex);
-      reward=RANK_P[Math.min(rk,RANK_P.length)-1];
-      rec[chIndex].rewarded=true;
-      points+=reward; store.points=points; awardPoints(reward);
-    }
+    const ms=chFinal, rec=todayRec(), r=rec[chIndex];
+    r.ms=ms; r.paths=null;                       // 완주 확정 → 재도전 불가
+    let paid=false;
+    if(!r.paid){ r.paid=true; paid=true; store.won+=PAY; awardPoints(PAY,'challenge-'+(chIndex+1)); }
     persist(); updateHud(); renderTabs();
 
-    const rk=myRank(chIndex);
+    const rk=myRank(chIndex), left=CHALLENGES.length-doneCount();
     setOverlay({
       big:'챌린지 완주',
       head:fmt(ms),
-      reward: reward ? '+'+reward+'<span class="p">P</span>' : rk+'<span class="p">위</span>',
-      desc: (improved ? '<b style="color:#41E6E0">최고 기록 갱신!</b><br>' : '최고 기록 '+fmt(best)+' · ')
-            +'오늘 '+NAMES.length+'명 중 <b style="color:#FFB84D">'+rk+'위</b>',
+      reward: paid ? '+'+PAY+'<span class="p">원</span>' : rk+'<span class="p">위</span>',
+      desc:'오늘 '+NAMES.length+'명 중 <b style="color:#FFB84D">'+rk+'위</b>'+
+           '<br>오늘 적립 <b>'+wonToday()+'원</b> · '+
+           (left ? '남은 판 <b>'+left+'</b>' : '<b style="color:#41E6E0">3판 모두 완료</b>'),
       left:{t:'목록으로', fn:()=>{ overlay.classList.remove('show'); goLobby(); }},
       right:{t:'랭킹 보기', fn:()=>{ overlay.classList.remove('show'); openRank(chIndex); }}
     });
@@ -763,26 +868,24 @@
              colors:Math.min(PAL.length, 4+Math.floor(s/2)) };
   }
 
-  // === 실제 앱 연동 지점 ===
-  function awardPoints(pts){
-    // 실제 서비스: 충전 세션 활성 검증 후 포인트 적립 API 호출
-    // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', points:pts, stage:stage}, '*');
-    console.log('[전류 잇기] 포인트 적립 요청:', pts, 'P ('+(inPlay?'challenge '+(chIndex+1):'stage '+stage)+')');
+  /* ===== 실제 앱 연동 지점 =====
+     서버에서 반드시 재검증할 것: 하루 3판 상한, 판별 1회 지급, 완주 여부.
+     클라이언트 localStorage 는 조작 가능하므로 지급 근거로 쓰면 안 됨.        */
+  function awardPoints(won, src){
+    // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', won:won, src:src, date:todayKey()}, '*');
+    console.log('[전류 잇기] 충전 포인트 적립 요청:', won+'원', '('+src+')');
   }
 
   /* ================= 버튼 배선 ================= */
-  const NEWP_HTML=el('newp').innerHTML;
-  el('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); };
-  el('newp').onclick=()=>{
-    if(inPlay){ startChallenge(chIndex); return; }        // 챌린지는 같은 판 재도전 + 타이머 리셋
-    const p=params(stage); genPuzzle(p.size,p.colors);
-  };
+  el('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); saveProgress(); };
+  el('newp').onclick=()=>{ const p=params(stage); genPuzzle(p.size,p.colors); };   // 온보딩 전용
   el('back').onclick=goLobby;
   el('tab-onboard').onclick=goOnboard;
   el('tab-challenge').onclick=goLobby;
+  window.addEventListener('pagehide', saveProgress);
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveProgress(); });
 
   /* ================= 초기화 ================= */
-  points=store.points||0;
   stage=Math.max(1, store.maxStage||1);
   renderTabs();
   const p0=params(stage); genPuzzle(p0.size,p0.colors);
