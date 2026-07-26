@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>충전기 정비사 · SK일렉링크</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============================================================
+     SK일렉링크 디자인 시스템 1.0 토큰
+     값을 직접 쓰지 않고 역할(Semantic)로만 참조한다.
+     ============================================================ */
+  :root{
+    /* Color — Scale */
+    --purple-50:#f5f0ff;  --purple-100:#ede3ff; --purple-200:#dcc9ff;
+    --purple-300:#c3a1ff; --purple-400:#a171ff; --purple-500:#7b42ff;
+    --purple-600:#6a2ff2; --purple-700:#5a23d6; --purple-800:#4a1eae; --purple-900:#3d1b8c;
+    --gray-50:#f9fafb;  --gray-100:#f3f4f6; --gray-200:#e5e7eb; --gray-300:#d1d5db;
+    --gray-400:#9ca3af; --gray-500:#6b7280; --gray-600:#4b5563; --gray-700:#374151;
+    --gray-800:#1f2937; --gray-900:#111827;
+
+    /* Color — Semantic */
+    --brand:var(--purple-500);      --brand-weak:var(--purple-50);
+    --text-1:var(--gray-900);       --text-2:var(--gray-600);      --text-3:var(--gray-400);
+    --bg:var(--gray-100);           --surface:#ffffff;             --line:var(--gray-300);
+
+    /* Color — Status */
+    --success:#0e9f5d; --success-weak:#e9f9f1;
+    --warning:#db7b06; --warning-weak:#fef4e6;
+    --error:#f04438;   --error-weak:#feeceb;
+
+    /* Radius (5단계) */
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:20px; --r-full:999px;
+
+    /* Elevation (3단계) */
+    --e1:0 1px 2px rgba(17,24,39,.06);
+    --e2:0 4px 16px rgba(17,24,39,.08);
+    --e3:0 12px 32px rgba(17,24,39,.12);
+
+    /* 게임 배선 색 — UI 토큰이 아닌 '게임 데이터' 팔레트.
+       브랜드 퍼플을 1번으로 두고, 밝은 표면에서 서로 구분되도록 색상환을 넓게 배치했다. */
+    --w1:#7b42ff; --w2:#0e9f5d; --w3:#f04438; --w4:#db7b06;
+    --w5:#0284c7; --w6:#db2777; --w7:#65a30d; --w8:#374151;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+    -webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:var(--bg); color:var(--text-1);
+    font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo",
+                "Noto Sans KR","Malgun Gothic",sans-serif;
+    font-size:16px; line-height:1.6; letter-spacing:-.01em;
+    display:flex; justify-content:center; align-items:flex-start;
+    min-height:100dvh; padding:16px 16px 48px; overflow-x:hidden;
+    touch-action:manipulation; overscroll-behavior:none;
+  }
+  .app{width:100%;max-width:440px;}
+
+  /* ---------- Typography (6단계) ---------- */
+  .t-display{font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.02em;}
+  .t-title  {font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;}
+  .t-heading{font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.02em;}
+  .t-body   {font-size:16px;font-weight:400;line-height:1.6;letter-spacing:-.01em;}
+  .t-label  {font-size:14px;font-weight:500;line-height:1.5;letter-spacing:-.01em;}
+  .t-caption{font-size:12px;font-weight:400;line-height:1.5;letter-spacing:-.01em;}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+  .em-brand{color:var(--brand);font-weight:600;}
+  .em-warn {color:var(--warning);font-weight:600;}
+  .em-ok   {color:var(--success);font-weight:600;}
+  .em-mute {color:var(--text-3);font-weight:500;}
+
+  /* ---------- SkelButton (h56 / r16 / 한 화면에 primary 하나) ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:56px;padding:0 20px;border-radius:var(--r-lg);border:1px solid var(--line);
+    background:var(--surface);color:var(--text-1);
+    font-family:inherit;font-size:16px;font-weight:600;line-height:1.6;letter-spacing:-.01em;
+    cursor:pointer;transition:background .15s,border-color .15s,opacity .15s;}
+  .btn:active{background:var(--gray-50);}
+  .btn.primary{background:var(--brand);border-color:transparent;color:#fff;}
+  .btn.primary:active{background:var(--purple-600);}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--brand);}
+  .btn:disabled{opacity:.3;pointer-events:none;}
+  .btn svg{width:18px;height:18px;vertical-align:-3px;}
+  .btn-expanded{width:100%;}
+
+  /* ---------- SkelCard (r20 / p20 / 그림자와 보더 동시 사용 금지) ---------- */
+  .card{background:var(--surface);border-radius:var(--r-xl);padding:20px;}
+  .card.outlined{border:1px solid var(--gray-200);}
+  .card.filled  {background:var(--gray-50);}
+  .card.elevated{box-shadow:var(--e2);}
+
+  /* ---------- SkelBadge (pill) ---------- */
+  .badge{display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-full);
+    padding:4px 10px;font-size:12px;font-weight:600;line-height:1.5;letter-spacing:-.01em;white-space:nowrap;}
+  .badge.neutral{background:var(--gray-100);color:var(--text-2);}
+  .badge.brand  {background:var(--brand-weak);color:var(--brand);}
+  .badge.success{background:var(--success-weak);color:var(--success);}
+  .badge.warning{background:var(--warning-weak);color:var(--warning);}
+  .badge.error  {background:var(--error-weak);color:var(--error);}
+  .badge.solid.brand  {background:var(--brand);color:#fff;}
+  .badge.solid.success{background:var(--success);color:#fff;}
+  .badge.solid.warning{background:var(--warning);color:#fff;}
+
+  /* ---------- SkelSection ---------- */
+  .section{margin-bottom:32px;}
+  .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .section-head h2{margin:0;font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.02em;}
+  .section-head p{margin:4px 0 0;font-size:14px;font-weight:500;line-height:1.5;color:var(--text-2);}
+
+  /* ============================================================
+     헤더
+     ============================================================ */
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+  .plug{width:44px;height:44px;border-radius:var(--r-md);flex:none;
+    background:var(--brand);display:grid;place-items:center;cursor:pointer;
+    box-shadow:var(--e2);}
+  .plug svg{width:22px;height:22px;}
+  .brand h1{margin:0;font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;}
+  .brand .sub{margin-top:2px;font-size:12px;font-weight:500;line-height:1.5;color:var(--text-3);}
+  .help{margin-left:auto;width:36px;height:36px;flex:none;border-radius:var(--r-full);
+    border:1px solid var(--line);background:var(--surface);color:var(--text-2);
+    font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;}
+  .help:active{background:var(--gray-100);}
+
+  /* ---------- 탭 (세그먼티드) ---------- */
+  .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--gray-200);
+    border-radius:var(--r-lg);padding:4px;margin-bottom:24px;}
+  .tab{flex:1;border:0;background:transparent;color:var(--text-2);font-family:inherit;
+    font-size:14px;font-weight:600;line-height:1.5;letter-spacing:-.01em;
+    padding:11px 8px;border-radius:var(--r-md);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,color .15s;}
+  .tab.active{background:var(--brand);color:#fff;}
+  .tab .lock{font-size:12px;}
+  .tab .dot{width:6px;height:6px;border-radius:var(--r-full);background:var(--warning);}
+  .tab.active .dot{background:#fff;}
+  .view{display:none;}
+  .view.on{display:block;}
+
+  /* ============================================================
+     출동 목록 (로비)
+     ============================================================ */
+  .lobby-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+  .lobby-head .d{font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.02em;color:var(--text-1);}
+  .lobby-head .r{font-size:12px;font-weight:400;color:var(--text-3);}
+
+  /* 적립 현황 */
+  .wallet{display:flex;justify-content:space-between;align-items:flex-end;
+    background:var(--surface);border-radius:var(--r-xl);padding:20px;margin-bottom:12px;
+    box-shadow:var(--e2);}
+  .wallet .wk{display:block;font-size:12px;font-weight:500;color:var(--text-3);margin-bottom:4px;}
+  .wallet .wv{font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.02em;color:var(--brand);
+    font-variant-numeric:tabular-nums;}
+  .wallet .wv small{font-size:16px;font-weight:600;}
+  .wallet .wmax{font-size:14px;font-weight:500;color:var(--text-3);letter-spacing:-.01em;}
+  .wallet .wr{text-align:right;}
+  .wallet .wv2{font-size:18px;font-weight:600;line-height:1.4;color:var(--text-1);
+    font-variant-numeric:tabular-nums;}
+  .wallet .wv2 small{font-size:12px;font-weight:500;color:var(--text-2);}
+
+  /* 시즌 요약 카드 */
+  .season-card{width:100%;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:12px;
+    background:var(--surface);border:1px solid var(--gray-200);border-radius:var(--r-xl);
+    padding:16px 20px;margin-bottom:12px;color:var(--text-1);font-family:inherit;text-align:left;
+    cursor:pointer;transition:border-color .15s,background .15s;}
+  .season-card:active{background:var(--gray-50);}
+  .season-card .sck{display:block;font-size:12px;font-weight:500;color:var(--text-3);margin-bottom:4px;}
+  .season-card .scv{font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;
+    color:var(--brand);font-variant-numeric:tabular-nums;}
+  .season-card .scv2{font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;
+    color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .season-card small{font-size:14px;font-weight:600;}
+  .season-card .scmax{font-size:12px;font-weight:500;color:var(--text-3);}
+  .season-card .sc-r{font-size:22px;}
+
+  /* 진행 현황 */
+  .quota{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:0 4px;}
+  .quota i{flex:1;height:6px;border-radius:var(--r-full);background:var(--gray-200);display:block;}
+  .quota i.on{background:var(--success);}
+  .quota span{margin-left:4px;font-size:12px;font-weight:500;color:var(--text-2);white-space:nowrap;}
+
+  /* 정비 요청 카드 */
+  .ch-card{width:100%;text-align:left;display:grid;grid-template-columns:48px 1fr auto;
+    align-items:center;gap:16px;background:var(--surface);border:1px solid var(--gray-200);
+    border-radius:var(--r-xl);padding:20px;margin-bottom:12px;color:var(--text-1);
+    font-family:inherit;cursor:pointer;transition:border-color .15s,background .15s;}
+  .ch-card:active{background:var(--gray-50);}
+  .ch-card .no{width:48px;height:48px;border-radius:var(--r-md);display:grid;place-items:center;
+    background:var(--brand-weak);color:var(--brand);font-size:18px;font-weight:700;
+    font-variant-numeric:tabular-nums;}
+  .ch-card.cleared .no{background:var(--success-weak);color:var(--success);}
+  .ch-card.prog .no{background:var(--warning-weak);color:var(--warning);}
+  .ch-card .nm,.ch-card .mt,.ch-card .rc{display:block;}
+  .ch-card .nm{font-size:16px;font-weight:600;line-height:1.5;letter-spacing:-.01em;}
+  .ch-card .mt{font-size:12px;font-weight:400;color:var(--text-3);margin-top:2px;}
+  .ch-card .rc{font-size:14px;font-weight:500;color:var(--text-2);margin-top:8px;
+    font-variant-numeric:tabular-nums;}
+  .ch-card .rc b{color:var(--text-1);font-weight:600;}
+  .ch-card .rc i{color:var(--brand);font-style:normal;font-weight:600;}
+  .ch-card .rc u{color:var(--warning);text-decoration:none;font-weight:600;}
+  .ch-card .rc s{color:var(--text-3);text-decoration:none;}
+  .ch-card .go{font-size:16px;color:var(--text-3);}
+
+  /* 잠금 안내 */
+  .locked{background:var(--surface);border:1px solid var(--gray-200);border-radius:var(--r-xl);
+    padding:40px 20px;text-align:center;}
+  .locked .ico{font-size:28px;line-height:1;}
+  .locked h3{margin:16px 0 8px;font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.02em;}
+  .locked p{margin:0 0 24px;font-size:14px;font-weight:500;line-height:1.5;color:var(--text-2);}
+  .locked .lbar{height:8px;border-radius:var(--r-full);background:var(--gray-200);overflow:hidden;}
+  .locked .lbar>i{display:block;height:100%;border-radius:var(--r-full);background:var(--brand);
+    transition:width .3s ease;}
+  .locked .lnum{margin-top:8px;font-size:12px;font-weight:600;color:var(--brand);
+    font-variant-numeric:tabular-nums;}
+
+  /* 완료 안내 */
+  .alldone{background:var(--success-weak);border-radius:var(--r-xl);padding:20px;text-align:center;
+    font-size:14px;font-weight:500;line-height:1.5;color:var(--gray-800);margin-bottom:12px;}
+  .alldone b{color:var(--success);font-weight:700;font-variant-numeric:tabular-nums;}
+  .alldone span{display:block;margin-top:4px;font-size:12px;font-weight:400;color:var(--text-2);}
+
+  /* 지난 시즌 결과 */
+  .prizebar{display:flex;align-items:flex-start;gap:12px;background:var(--warning-weak);
+    border-radius:var(--r-xl);padding:16px 20px;margin-bottom:12px;
+    font-size:14px;font-weight:500;line-height:1.5;color:var(--gray-800);}
+  .prizebar b{color:var(--warning);font-weight:700;font-variant-numeric:tabular-nums;}
+  .prizebar .x{margin-left:auto;flex:none;border:0;background:transparent;color:var(--text-3);
+    font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
+  .prizebar.none{background:var(--gray-100);color:var(--text-2);}
+  .prizebar.none b{color:var(--text-1);}
+
+  /* ============================================================
+     정비 화면
+     ============================================================ */
+  .playbar{display:none;align-items:center;gap:12px;margin-bottom:16px;}
+  .playbar.on{display:flex;}
+  .playbar .back{height:40px;padding:0 14px;border:1px solid var(--line);background:var(--surface);
+    color:var(--text-1);border-radius:var(--r-md);font-family:inherit;font-size:14px;font-weight:600;
+    letter-spacing:-.01em;cursor:pointer;}
+  .playbar .back:active{background:var(--gray-100);}
+  .playbar .t{font-size:14px;font-weight:600;color:var(--text-2);letter-spacing:-.01em;}
+
+  .readout{background:var(--surface);border:1px solid var(--gray-200);border-radius:var(--r-xl);
+    padding:20px;margin-bottom:16px;}
+  .meter-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .meter-top .lab{font-size:14px;font-weight:500;color:var(--text-2);}
+  .meter-top .goal{font-size:14px;font-weight:600;color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .meter-top .goal b{color:var(--brand);}
+  .bar{height:8px;border-radius:var(--r-full);background:var(--gray-200);margin-top:12px;overflow:hidden;}
+  .bar>i{display:block;height:100%;width:0%;border-radius:var(--r-full);background:var(--brand);
+    transition:width .3s ease;}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+  .stat{background:var(--gray-50);border-radius:var(--r-md);padding:12px;}
+  .stat .k{font-size:12px;font-weight:500;color:var(--text-3);}
+  .stat .v{font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;margin-top:2px;
+    color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .stat .v.sm{font-size:18px;line-height:1.4;}
+  .stat .v small{font-size:12px;font-weight:600;}
+  .stat.pt .v{color:var(--brand);}
+
+  /* 보드 */
+  .board-wrap{position:relative;}
+  .board{position:relative;width:100%;aspect-ratio:1/1;display:grid;gap:4px;padding:12px;
+    background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--e2);
+    touch-action:none;user-select:none;}
+  .board.dense{padding:8px;gap:3px;}
+  .cell{position:relative;border-radius:var(--r-sm);background:var(--gray-100);}
+  .board.dense .cell{border-radius:var(--r-sm);}
+  /* .core / .dline 의 4px 은 UI 라운드가 아니라 배선 굵기에 맞춘 캔버스 지오메트리 */
+  .core{position:absolute;left:35%;top:35%;width:30%;height:30%;border-radius:4px;z-index:2;}
+  .arm{position:absolute;z-index:1;}
+  .arm.u{left:35%;top:0;width:30%;height:52%;}
+  .arm.d{left:35%;top:48%;width:30%;height:52%;}
+  .arm.l{left:0;top:35%;width:52%;height:30%;}
+  .arm.r{left:48%;top:35%;width:52%;height:30%;}
+  .term{position:absolute;left:15%;top:15%;width:70%;height:70%;border-radius:var(--r-full);z-index:3;
+    border:3px solid var(--surface);}
+  .board.dense .term{left:11%;top:11%;width:78%;height:78%;border-width:2px;}
+  .term.done{animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+
+  .controls{display:flex;gap:8px;margin-top:16px;}
+  .controls .btn{flex:1;}
+  .controls.solo #newp{display:none;}   /* 정비 중엔 '새 판' 없음 — 타이머 리셋 어뷰징 차단 */
+  .hint{text-align:center;color:var(--text-3);font-size:12px;font-weight:400;line-height:1.5;margin-top:12px;}
+  .hint b{font-weight:600;}
+
+  /* 수리 완료 오버레이 */
+  .overlay{position:absolute;inset:0;border-radius:var(--r-xl);background:rgba(255,255,255,.94);
+    backdrop-filter:blur(4px);display:none;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;z-index:10;}
+  .overlay.show{display:flex;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .overlay .big{font-size:12px;font-weight:600;color:var(--brand);letter-spacing:-.01em;}
+  .overlay .headline{font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.02em;margin:8px 0 0;}
+  .overlay .reward{margin:16px 0 8px;font-size:28px;font-weight:700;line-height:1.3;
+    color:var(--warning);font-variant-numeric:tabular-nums;}
+  .overlay .reward .p{font-size:18px;}
+  .overlay .desc{color:var(--text-2);font-size:14px;font-weight:500;line-height:1.5;
+    max-width:280px;margin-bottom:24px;}
+  .overlay .o-btns{display:flex;gap:8px;width:100%;max-width:320px;}
+  .overlay .o-btns .btn{flex:1;}
+
+  /* ============================================================
+     랭킹 바텀시트
+     ============================================================ */
+  .sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;
+    background:rgba(17,24,39,.45);}
+  .sheet.show{display:flex;animation:fade .2s ease;}
+  .sheet-in{width:100%;max-width:440px;background:var(--surface);
+    border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:var(--e3);
+    padding:12px 16px calc(24px + env(safe-area-inset-bottom));
+    max-height:88dvh;overflow:auto;animation:up .26s cubic-bezier(.2,.8,.2,1);}
+  @keyframes up{from{transform:translateY(24px);opacity:.5;}to{transform:none;opacity:1;}}
+  .sheet .grab{width:40px;height:4px;border-radius:var(--r-full);background:var(--gray-200);margin:0 auto 16px;}
+  .sheet h3{margin:0;font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.02em;}
+  .sheet .sub2{margin:4px 0 16px;font-size:12px;font-weight:400;color:var(--text-3);}
+  .sheet .btn{width:100%;margin-top:16px;}
+
+  /* 완주 결과 */
+  .result{background:var(--brand-weak);border-radius:var(--r-xl);padding:20px;text-align:center;margin-bottom:16px;}
+  .result .rbig{font-size:12px;font-weight:600;color:var(--brand);}
+  .result .rtime{font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.02em;margin:4px 0 12px;
+    color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .result .rrow{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;}
+  .result .rrow span{background:var(--surface);border-radius:var(--r-full);padding:6px 12px;
+    font-size:12px;font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums;}
+  .result .rrow b{color:var(--text-1);font-weight:700;}
+  .result .rrow .pay{background:var(--warning);color:#fff;font-weight:700;}
+  .result .rrow .sp{background:var(--brand);color:#fff;font-weight:700;}
+
+  /* 모드 전환 */
+  .rmode{display:flex;gap:4px;background:var(--gray-100);border-radius:var(--r-lg);padding:4px;margin-bottom:20px;}
+  .rmode button{flex:1;border:0;background:transparent;color:var(--text-2);font-family:inherit;
+    font-size:14px;font-weight:600;letter-spacing:-.01em;padding:11px 8px;border-radius:var(--r-md);cursor:pointer;}
+  .rmode button.on{background:var(--surface);color:var(--brand);box-shadow:var(--e1);}
+
+  .rswitch{display:flex;gap:4px;background:var(--gray-100);border-radius:var(--r-md);padding:4px;margin-bottom:16px;}
+  .rswitch button{flex:1;border:0;background:transparent;color:var(--text-2);font-family:inherit;
+    font-size:12px;font-weight:600;letter-spacing:-.01em;padding:9px 4px;border-radius:var(--r-sm);cursor:pointer;}
+  .rswitch button.on{background:var(--surface);color:var(--brand);box-shadow:var(--e1);}
+
+  /* 랭킹 리스트 */
+  .rank{list-style:none;margin:0;padding:0;}
+  .rank li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:12px;
+    padding:12px;border-radius:var(--r-md);background:var(--gray-50);margin-bottom:8px;}
+  .rank li.me{background:var(--brand-weak);}
+  .rank .p{font-size:14px;font-weight:700;color:var(--text-3);text-align:center;
+    font-variant-numeric:tabular-nums;}
+  .rank .p.g1{color:var(--warning);} .rank .p.g2{color:var(--text-2);} .rank .p.g3{color:#a16207;}
+  .rank .nm2{font-size:14px;font-weight:600;letter-spacing:-.01em;}
+  .rank li.me .nm2:after{content:'YOU';display:inline-block;font-size:12px;font-weight:700;
+    background:var(--brand);color:#fff;border-radius:var(--r-full);padding:1px 8px;margin-left:8px;
+    vertical-align:1px;letter-spacing:0;line-height:1.4;}
+  .rank .tm{font-size:14px;font-weight:600;color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .rank .tm.non{color:var(--text-3);font-weight:500;}
+  .rank .pt2{font-size:14px;font-weight:700;color:var(--text-1);font-variant-numeric:tabular-nums;}
+
+  /* 시즌 패널 */
+  .season-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .info{flex:none;height:36px;padding:0 12px;border-radius:var(--r-full);
+    border:1px solid var(--line);background:var(--surface);color:var(--brand);
+    font-family:inherit;font-size:12px;font-weight:600;letter-spacing:-.01em;cursor:pointer;}
+  .info:active{background:var(--brand-weak);}
+  .myseason{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--gray-50);border-radius:var(--r-xl);padding:20px;margin-bottom:12px;}
+  .myseason .l{display:block;font-size:12px;font-weight:500;color:var(--text-3);margin-bottom:4px;}
+  .myseason .v{font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;
+    color:var(--brand);font-variant-numeric:tabular-nums;}
+  .myseason .v small{font-size:14px;font-weight:600;}
+  .myseason .r{text-align:right;}
+  .myseason .r .v{color:var(--text-1);}
+
+  /* 보상 자격 게이지 */
+  .qual{background:var(--warning-weak);border-radius:var(--r-md);padding:16px;margin-bottom:16px;}
+  .qual .qt{display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;}
+  .qual .qt b{color:var(--text-1);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .qual .qbar{height:8px;border-radius:var(--r-full);background:rgba(17,24,39,.08);overflow:hidden;}
+  .qual .qbar>i{display:block;height:100%;border-radius:var(--r-full);background:var(--warning);
+    transition:width .3s ease;}
+  .qual .qm{margin-top:8px;font-size:12px;font-weight:500;line-height:1.5;color:var(--text-2);}
+  .qual.done{background:var(--success-weak);}
+  .qual.done .qbar>i{background:var(--success);}
+  .qual.done .qm{color:var(--success);font-weight:600;}
+  .season-foot{margin-top:12px;font-size:12px;font-weight:400;color:var(--text-3);text-align:center;line-height:1.5;}
+  .season-foot b{color:var(--text-2);font-weight:600;}
+
+  /* 랭킹 안내 */
+  #pane-guide{display:none;}
+  .gsec{margin-top:24px;}
+  .gh{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;line-height:1.4;
+    letter-spacing:-.02em;margin-bottom:8px;}
+  .gh b{width:24px;height:24px;flex:none;border-radius:var(--r-sm);display:grid;place-items:center;
+    background:var(--brand-weak);color:var(--brand);font-size:12px;font-weight:700;}
+  .gsec p{margin:0;font-size:14px;font-weight:400;line-height:1.6;color:var(--text-2);}
+  .gsec em{font-style:normal;color:var(--text-1);font-weight:600;}
+  .gnote{margin-top:8px!important;font-size:12px!important;color:var(--text-3)!important;}
+  .gnote em{color:var(--text-2)!important;}
+  .warn{background:var(--warning-weak);border-radius:var(--r-md);padding:16px;
+    font-size:14px;font-weight:500;line-height:1.5;color:var(--gray-800);margin-bottom:12px;}
+  .warn em{font-style:normal;color:var(--warning);font-weight:700;}
+  .gtable{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:12px;
+    font-size:14px;font-variant-numeric:tabular-nums;}
+  .gtable th{text-align:left;font-size:12px;font-weight:500;color:var(--text-3);padding:0 12px 0;}
+  .gtable th:last-child,.gtable td:last-child{text-align:right;}
+  .gtable td{background:var(--gray-50);padding:12px;color:var(--text-2);font-weight:500;}
+  .gtable td:first-child{border-radius:var(--r-md) 0 0 var(--r-md);}
+  .gtable td:last-child{border-radius:0 var(--r-md) var(--r-md) 0;}
+  .gtable b{color:var(--brand);font-weight:700;}
+  .gtable.prize b{color:var(--warning);}
+  .gtable .p1 td{background:var(--warning-weak);} .gtable .p1 td:first-child{color:var(--warning);font-weight:600;}
+  .gtable .p2 td{background:var(--gray-100);} .gtable .p2 td:first-child{color:var(--text-1);font-weight:600;}
+  .gtable .p3 td{background:var(--gray-100);} .gtable .p3 td:first-child{color:#a16207;font-weight:600;}
+
+  /* ============================================================
+     첫 진입 가이드
+     ============================================================ */
+  .tut{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+    padding:16px;background:rgba(17,24,39,.55);}
+  .tut.show{display:flex;animation:fade .25s ease;}
+  .tut-in{width:100%;max-width:400px;background:var(--surface);border-radius:var(--r-xl);
+    padding:24px 20px;max-height:92dvh;overflow:auto;box-shadow:var(--e3);
+    animation:up .3s cubic-bezier(.2,.8,.2,1);}
+  .tut-badge{display:inline-block;background:var(--brand-weak);color:var(--brand);
+    border-radius:var(--r-full);padding:4px 10px;font-size:12px;font-weight:600;letter-spacing:-.01em;}
+  .tut h2{margin:12px 0 16px;font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.02em;}
+  .tut-badge .y{display:inline-block;padding:8px 6px;margin:-8px -6px;cursor:pointer;}
+
+  .slide{display:none;}
+  .slide.on{display:block;animation:fade .22s ease;}
+  .story{width:100%;height:auto;display:block;border-radius:var(--r-md);
+    background:var(--gray-100);margin-bottom:16px;}
+  .story-txt{margin:0;font-size:14px;font-weight:400;line-height:1.6;color:var(--text-2);}
+  .story-txt b{color:var(--text-1);font-weight:600;}
+
+  /* 드래그 시연 */
+  .demo{position:relative;background:var(--gray-50);border-radius:var(--r-md);padding:16px;margin-bottom:20px;}
+  .dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .dcell{position:relative;aspect-ratio:1/1;border-radius:var(--r-sm);background:var(--gray-200);}
+  .ddot{position:absolute;left:15%;top:15%;width:70%;height:70%;border-radius:var(--r-full);z-index:3;
+    border:3px solid var(--surface);}
+  .ddot.c1{background:var(--w1);}
+  .dline{position:absolute;left:16px;top:50%;height:24%;width:0;border-radius:4px;z-index:2;
+    background:var(--w1);transform:translateY(-50%);animation:dgrow 3s cubic-bezier(.4,0,.3,1) infinite;}
+  .dfinger{position:absolute;top:50%;width:28px;height:28px;border-radius:var(--r-full);z-index:4;
+    background:rgba(123,66,255,.18);border:2px solid var(--brand);
+    transform:translate(-50%,-50%);animation:dmove 3s cubic-bezier(.4,0,.3,1) infinite;}
+  @keyframes dgrow{0%,10%{width:0;}62%,88%{width:calc(100% - 32px);}100%{width:0;opacity:0;}}
+  @keyframes dmove{0%,10%{left:28px;}62%,88%{left:calc(100% - 28px);}89%{opacity:1;}100%{left:28px;opacity:0;}}
+
+  .steps{list-style:none;margin:0 0 16px;padding:0;}
+  .steps li{display:grid;grid-template-columns:24px 1fr;gap:12px;align-items:start;margin-bottom:12px;}
+  .steps b{width:24px;height:24px;border-radius:var(--r-sm);display:grid;place-items:center;
+    background:var(--brand-weak);color:var(--brand);font-size:12px;font-weight:700;}
+  .steps span{font-size:14px;font-weight:400;line-height:1.6;color:var(--text-2);}
+  .steps em{font-style:normal;color:var(--text-1);font-weight:600;}
+  .tut-note{font-size:12px;color:var(--text-3);text-align:center;}
+  .tut-note b{color:var(--text-2);font-weight:600;}
+
+  .tut-nav{margin-top:24px;}
+  .dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px;}
+  .dots i{width:6px;height:6px;border-radius:var(--r-full);background:var(--gray-300);transition:all .2s;}
+  .dots i.on{width:20px;border-radius:var(--r-full);background:var(--brand);}
+  .tut-btns{display:flex;gap:8px;}
+  .tut-btns .btn{flex:1;}
+  .tut-btns .btn.hide{display:none;}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <div class="plug" id="plug" title="길게 볼 것 없음">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    </div>
+    <div><h1>충전기 정비사</h1><div class="sub">EV Charger Repair</div></div>
+    <button class="help" id="help" aria-label="게임 방법">?</button>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" id="tab-onboard">정비 교육</button>
+    <button class="tab" id="tab-challenge">오늘의 출동 <span class="lock" id="tab-lock">🔒</span></button>
+  </div>
+
+  <!-- ===================== 챌린지 로비 ===================== -->
+  <div class="view" id="view-lobby">
+    <div class="lobby-head">
+      <span class="d" id="ch-date">—</span>
+      <span class="r">오늘의 정비 요청</span>
+    </div>
+    <div id="ch-list"></div>
+  </div>
+
+  <!-- ===================== 게임 보드 ===================== -->
+  <div class="view on" id="view-game">
+  <div class="playbar" id="playbar">
+    <button class="back" id="back">← 목록</button>
+    <span class="t" id="play-title"></span>
+  </div>
+
+  <div class="readout">
+    <div class="meter-top">
+      <span class="lab">회로 완성도</span>
+      <span class="goal"><b id="conn">0</b> / <span id="total">0</span> 회로 연결</span>
+    </div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="stats">
+      <div class="stat"><div class="k" id="k1">교육 과정</div><div class="v" id="stage">1</div></div>
+      <div class="stat"><div class="k">채움</div><div class="v" id="fill">0<small>%</small></div></div>
+      <div class="stat pt"><div class="k" id="k3">적립 충전금</div><div class="v" id="points">0<small>원</small></div></div>
+    </div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board" id="board">
+      <div class="overlay" id="overlay">
+        <div class="big">수리 완료</div>
+        <div class="headline" id="o-head">STAGE 1 CLEAR</div>
+        <div class="reward" id="o-reward">+60<span class="p">P</span></div>
+        <div class="desc" id="o-desc">모든 회로가 연결됐어요. 충전 포인트가 적립됐습니다.</div>
+        <div class="o-btns">
+          <button class="btn" id="o-restart">처음부터</button>
+          <button class="btn primary" id="o-next">다음 스테이지</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button class="btn" id="clear">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      지우기
+    </button>
+    <button class="btn" id="newp">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 1 0-.9 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      새 판
+    </button>
+  </div>
+  <div class="hint" id="hint">같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성</div>
+  </div><!-- /view-game -->
+</div>
+
+<!-- ===================== 첫판 가이드 ===================== -->
+<div class="tut" id="tut">
+  <div class="tut-in">
+
+  <!-- 1컷 : 고장 접수 -->
+  <section class="slide" data-s="0">
+    <div class="tut-badge">EPISODE 01 · 고장 접수</div>
+    <h2>충전소가 멈췄습니다</h2>
+    <img class="story" src="story-1.webp" alt="고객이 충전소 고장을 접수하고, 상담원이 정비사 출동을 준비한다" width="960" height="524">
+    <p class="story-txt">“여보세요, 충전소가 고장 났어요.”<br>
+      접수된 고장 신고가 <b>정비반</b>으로 넘어왔습니다.</p>
+  </section>
+
+  <!-- 2컷 : 정비사 출동 -->
+  <section class="slide" data-s="1">
+    <div class="tut-badge">EPISODE 02 · 현장 출동</div>
+    <h2>당신이 출동할 차례입니다</h2>
+    <img class="story" src="story-2.webp" alt="공구함과 케이블을 든 정비사가 충전소로 향한다" width="960" height="524">
+    <p class="story-txt">공구함을 챙겨 현장에 도착했습니다.<br>
+      끊어진 <b>배선을 다시 이어</b> 충전기를 살려주세요.</p>
+  </section>
+
+  <!-- 3컷 : 조작법 -->
+  <section class="slide" data-s="2">
+    <div class="tut-badge">HOW TO PLA<span class="y" id="skip-y">Y</span></div>
+    <h2>같은 색 단자를 이어서<br>전류를 흐르게 하세요</h2>
+
+    <div class="demo" aria-hidden="true">
+      <div class="dgrid">
+        <div class="dcell"><i class="ddot c1"></i></div><div class="dcell"></div>
+        <div class="dcell"></div><div class="dcell"><i class="ddot c1"></i></div>
+      </div>
+      <i class="dline"></i><i class="dfinger"></i>
+    </div>
+
+    <ol class="steps">
+      <li><b>1</b><span>같은 색 <em>단자 두 개</em>를 드래그해서 배선을 잇습니다</span></li>
+      <li><b>2</b><span>배선은 <em>서로 겹칠 수 없어요</em>. 다른 선 위를 지나가면 그 선이 끊깁니다</span></li>
+      <li><b>3</b><span><em>빈칸을 하나도 남기지 않고</em> 모두 채워야 수리 완료입니다</span></li>
+    </ol>
+
+    <div class="tut-note">막히면 <b>지우기</b>로 언제든 다시 배선할 수 있어요</div>
+  </section>
+
+    <div class="tut-nav">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="tut-btns">
+        <button class="btn" id="tut-prev">이전</button>
+        <button class="btn primary" id="tut-go">다음</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 랭킹 시트 ===================== -->
+<div class="sheet" id="sheet">
+  <div class="sheet-in">
+    <div class="grab"></div>
+    <div id="rank-result"></div>
+
+    <div class="rmode" id="rank-mode">
+      <button data-m="today" class="on">오늘 기록</button>
+      <button data-m="season">시즌 랭킹</button>
+    </div>
+
+    <!-- 오늘 기록 -->
+    <div id="pane-today">
+      <h3 id="rank-title">랭킹</h3>
+      <div class="sub2" id="rank-sub">FASTEST TIME</div>
+      <div class="rswitch" id="rank-switch"></div>
+      <ol class="rank" id="rank-list"></ol>
+    </div>
+
+    <!-- 시즌 랭킹 -->
+    <div id="pane-season">
+      <div class="season-head">
+        <div>
+          <h3 id="season-title">시즌</h3>
+          <div class="sub2" id="season-sub">SEASON RANKING</div>
+        </div>
+        <button class="info" id="season-info">ⓘ 랭킹 안내</button>
+      </div>
+      <div class="myseason" id="myseason"></div>
+      <div class="qual" id="qual"></div>
+      <ol class="rank" id="season-list"></ol>
+      <div class="season-foot" id="season-foot"></div>
+    </div>
+
+    <!-- 시즌 랭킹 안내 -->
+    <div id="pane-guide">
+      <h3>시즌 랭킹 안내</h3>
+      <div class="sub2">HOW SEASON RANKING WORKS</div>
+
+      <div class="gsec">
+        <div class="gh"><b>1</b> 시즌이란?</div>
+        <p>시즌은 <em>매달 1일에 시작해 말일에 끝납니다.</em> 시즌이 끝나면 순위에 따라
+          충전 포인트를 지급하고, 점수는 0점으로 초기화된 채 새 시즌이 시작됩니다.</p>
+      </div>
+
+      <div class="gsec">
+        <div class="gh"><b>2</b> 점수 쌓는 법</div>
+        <p>매일 배정되는 <em>정비 요청 3건</em>을 수리하면, 그날 그 충전기의
+          수리 시간 순위에 따라 시즌 점수가 쌓입니다. 하루 최대 <em>15점</em>.</p>
+        <table class="gtable">
+          <tr><th>그날 순위</th><th>획득 점수</th></tr>
+          <tr><td>1위</td><td><b>5점</b></td></tr>
+          <tr><td>2위</td><td><b>4점</b></td></tr>
+          <tr><td>3위</td><td><b>3점</b></td></tr>
+          <tr><td>4~10위</td><td><b>2점</b></td></tr>
+          <tr><td>11위 이하</td><td><b>1점</b></td></tr>
+        </table>
+        <p class="gnote">수리를 완료하지 못하면 점수가 없습니다. 순위는 <em>가장 빨리 고친 순서</em>입니다.</p>
+      </div>
+
+      <div class="gsec">
+        <div class="gh"><b>3</b> 시즌 보상</div>
+        <div class="warn">⚠ 시즌 보상은 <em>누적 100점 이상</em>을 확보해야 받을 수 있습니다.<br>
+          100점 미만이면 순위와 관계없이 보상이 지급되지 않습니다.</div>
+        <p>시즌 종료 시 <em>최종 누적 점수</em> 순위로 충전 포인트를 지급합니다.
+          보상은 다음 시즌 시작과 함께 자동 적립됩니다.</p>
+        <table class="gtable prize">
+          <tr><th>최종 순위</th><th>보상</th></tr>
+          <tr class="p1"><td>🥇 1위</td><td><b>5,000P</b></td></tr>
+          <tr class="p2"><td>🥈 2위</td><td><b>3,000P</b></td></tr>
+          <tr class="p3"><td>🥉 3위</td><td><b>2,000P</b></td></tr>
+          <tr><td>4~10위</td><td><b>1,000P</b></td></tr>
+          <tr><td>11~100위</td><td><b>500P</b></td></tr>
+        </table>
+        <p class="gnote">1P = 1원으로 충전 시 사용할 수 있습니다.<br>
+          100점은 <em>하루 3건을 꾸준히 수리하면 약 10일</em>이면 도달합니다 (하루 최대 15점).</p>
+      </div>
+
+      <div class="gsec">
+        <div class="gh"><b>4</b> 알아두기</div>
+        <p>· 동점일 경우 <em>먼저 도달한 정비사</em>가 상위입니다.<br>
+           · 정비 요청은 <em>매일 자정에 3건</em>이 새로 배정됩니다.<br>
+           · 같은 날 모든 정비사에게 <em>동일한 고장</em>이 배정되므로 기록 비교가 공정합니다.<br>
+           · 한 번 수리를 완료한 충전기는 그날 다시 출동할 수 없습니다.</p>
+      </div>
+    </div>
+
+    <button class="btn" id="sheet-close">닫기</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // 배선 색: UI 토큰이 아닌 게임 데이터. brand/status 색을 우선 쓰고 나머지는 색상환을 넓게 벌렸다.
+  const PAL=['#7b42ff','#0e9f5d','#f04438','#db7b06','#0284c7','#db2777','#65a30d','#374151'];
+  const board=document.getElementById('board');
+
+  let W,H,N, cellColor, endpointOf, colorPaths, colorDone, numColors;
+  let cellEls=[], stage=1;
+  let drawing=false, active=-1;
+
+  /* ================= 챌린지 설정 ================= */
+  const ME='Ian';                             // 로그인 붙기 전 임시 내 ID
+  const NAMES=['Ian','Cristie','Tiffny','John','Morgan','Tommy','Anders','Hazle','Judge','Andy'];
+
+  const ONBOARD_STEPS=[                       // 온보딩 5판 : 5×5 → 7×7 로 완만하게
+    { size:5, colors:4 },
+    { size:5, colors:5 },
+    { size:6, colors:5 },
+    { size:6, colors:6 },
+    { size:7, colors:6 },
+  ];
+  const ONBOARD_LEN=ONBOARD_STEPS.length;
+
+  const CHALLENGES=[                          // 랭킹전 : 8×8 / 9×9 / 10×10
+    { name:'100kW 충전기', kw:100, tag:'완속 · 표준형', size: 8, colors:7, base:170000 },
+    { name:'200kW 충전기', kw:200, tag:'급속 · 고전력', size: 9, colors:8, base:255000 },
+    { name:'350kW 충전기', kw:350, tag:'초급속 · 최고난도', size:10, colors:8, base:360000 },
+  ];
+  const DEV=true;                             // ⚠ 테스트용 숨은 단축키. 실서비스 배포 전 false
+  const PAY=10;                               // 1판 = 10원 (충전 포인트)
+  /* 적립 규칙
+     - 온보딩: 각 단계 최초 클리어 1회만 지급 (10단계 = 100원, 반복 파밍 불가)
+     - 챌린지: 하루 3판 × 10원 = 30원. 완주하면 그날은 재참여 불가        */
+
+  /* ---------- 시드 난수 : 같은 날 = 같은 문제 = 공정한 랭킹 ---------- */
+  function hashStr(s){
+    let h=2166136261>>>0;
+    for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+    return h>>>0;
+  }
+  function mulberry32(a){
+    return function(){
+      a=a+0x6D2B79F5|0;
+      let t=Math.imul(a^a>>>15, 1|a);
+      t=t+Math.imul(t^t>>>7, 61|t)^t;
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+  let rnd=Math.random;                        // genPuzzle 이 시드에 따라 교체
+
+  /* ---------- 저장 ---------- */
+  const KEY='circuit-connect.v2';
+
+  /* 테스트용 초기화 : 주소 끝에 ?reset 을 붙이면 저장된 진행도를 전부 지운다 */
+  if(/[?&#]reset\b/.test(location.search+location.hash)){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    location.replace(location.href.split(/[?#]/)[0]);
+    return;
+  }
+
+  // paidStage: 여기까지의 온보딩 단계는 이미 적립됨 → '처음부터'로 재클리어해도 재지급 없음
+  let store={ maxStage:1, won:0, paidStage:0, unlocked:false, daily:{} };
+  try{ const raw=localStorage.getItem(KEY); if(raw) store=Object.assign(store, JSON.parse(raw)||{}); }catch(e){}
+  function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+
+  const keyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  function todayKey(){ return keyOf(new Date()); }
+  function seasonKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+  function parseKey(k){ const a=k.split('-').map(Number); return new Date(a[0],a[1]-1,a[2]||1); }
+  function seasonLastDay(sk){ const a=sk.split('-').map(Number); return keyOf(new Date(a[0],a[1],0)); }
+  function seasonLabel(sk){ const a=sk.split('-').map(Number); return a[0]+'년 '+a[1]+'월'; }
+  function dateKeys(fromK, toK){                 // 시즌 최대 31일 + 여유
+    const out=[]; let d=parseKey(fromK); const end=parseKey(toK);
+    for(let i=0;i<40 && d<=end;i++){ out.push(keyOf(d)); d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1); }
+    return out;
+  }
+  function todayRec(){
+    const t=todayKey();
+    if(!store.daily || typeof store.daily!=='object') store.daily={};
+    for(const k of Object.keys(store.daily)) if(k!==t) delete store.daily[k];   // 날짜 바뀌면 초기화
+    if(!store.daily[t]) store.daily[t]={};
+    return store.daily[t];
+  }
+  function myBest(ci){ const r=todayRec()[ci]; return (r && r.ms!=null) ? r.ms : null; }
+  function doneCount(){ const r=todayRec(); return CHALLENGES.filter((c,i)=>r[i] && r[i].ms!=null).length; }
+  function wonToday(){ return doneCount()*PAY; }
+
+  /* ---------- 시간 표기 ---------- */
+  function fmt(ms){
+    if(ms==null) return '--:--';
+    const t=Math.floor(ms/100), s=Math.floor(t/10);
+    return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+'.'+(t%10);
+  }
+
+  /* ---------- 일일 랭킹 : 봇 기록도 날짜 시드라 새로고침해도 그대로 ---------- */
+  function botTimes(ci, dk){
+    const key=dk||todayKey();
+    return NAMES.filter(n=>n!==ME).map(n=>{
+      const r=mulberry32(hashStr(key+'|'+ci+'|'+n));
+      r(); r();
+      return { name:n, ms:Math.round(CHALLENGES[ci].base*(0.52+r()*1.15)) };
+    });
+  }
+  function leaderboard(ci){
+    const list=botTimes(ci);
+    list.push({ name:ME, ms:myBest(ci), me:true });
+    list.sort((a,b)=>{
+      if(a.ms==null && b.ms==null) return 0;
+      if(a.ms==null) return 1;
+      if(b.ms==null) return -1;
+      return a.ms-b.ms;
+    });
+    return list;
+  }
+  function myRank(ci){ return leaderboard(ci).findIndex(x=>x.me)+1; }
+
+  /* ================= 시즌 랭킹 =================
+     · 매달 1일 시작 ~ 말일 종료
+     · 그날 순위에 따라 시즌 점수 누적 (1위 5 / 2위 4 / 3위 3 / 4~10위 2 / 그 외 1)
+     · 시즌 종료 시 최종 순위로 충전 포인트 지급                        */
+  const SEASON_PTS = r => r===1?5 : r===2?4 : r===3?3 : r<=10?2 : 1;
+  const SEASON_PRIZE = [ {to:1,p:5000}, {to:2,p:3000}, {to:3,p:2000}, {to:10,p:1000}, {to:100,p:500} ];
+  const SEASON_MIN_PTS = 100;                  // 이 점수를 넘겨야 시즌 보상 대상
+  function prizeOf(rank, pts){
+    if(pts!=null && pts<SEASON_MIN_PTS) return 0;   // 최소 점수 미달 → 순위와 무관하게 보상 없음
+    for(const t of SEASON_PRIZE) if(rank<=t.to) return t.p;
+    return 0;
+  }
+
+  // 봇들의 시즌 누적 점수. 날짜 시드라 언제 계산해도 같은 값이 나온다.
+  function botSeasonPts(fromK, toK){
+    const pts={}; NAMES.filter(n=>n!==ME).forEach(n=>pts[n]=0);
+    const tk=todayKey(), rec=todayRec();
+    for(const dk of dateKeys(fromK,toK)){
+      for(let ci=0; ci<CHALLENGES.length; ci++){
+        const list=botTimes(ci,dk);
+        // 오늘 내가 완주한 판은 내 기록도 끼워넣어 봇 순위를 밀어낸다
+        if(dk===tk && rec[ci] && rec[ci].ms!=null) list.push({name:ME, ms:rec[ci].ms, me:true});
+        list.sort((a,b)=>a.ms-b.ms);
+        list.forEach((r,i)=>{ if(!r.me) pts[r.name]+=SEASON_PTS(i+1); });
+      }
+    }
+    return pts;
+  }
+  function seasonBoard(season){
+    const s=season||store.season;
+    const until = (s.key===seasonKey()) ? todayKey() : seasonLastDay(s.key);
+    const bp=botSeasonPts(s.since, until);
+    const list=NAMES.filter(n=>n!==ME).map(n=>({ name:n, pts:bp[n] }));
+    list.push({ name:ME, pts:s.pts, me:true });
+    list.sort((a,b)=> b.pts-a.pts || a.name.localeCompare(b.name));
+    return list;
+  }
+  function mySeasonRank(season){ return seasonBoard(season).findIndex(x=>x.me)+1; }
+
+  /* 시즌 경계 처리 : 달이 바뀌었으면 이전 시즌을 정산하고 새 시즌 시작 */
+  function ensureSeason(){
+    const sk=seasonKey();
+    if(!store.season || !store.season.key){ store.season={ key:sk, pts:0, since:todayKey() }; persist(); return; }
+    if(store.season.key===sk) return;
+    const prev=store.season;
+    const rank=mySeasonRank(prev), prize=prizeOf(rank, prev.pts);
+    if(prize){ store.won+=prize; awardPoints(prize,'season-'+prev.key+'-rank'+rank); }
+    store.lastSeason={ key:prev.key, rank:rank, pts:prev.pts, prize:prize,
+                       short: prev.pts<SEASON_MIN_PTS, seen:false };
+    store.season={ key:sk, pts:0, since:todayKey() };
+    persist();
+  }
+
+  /* ---------- 레벨 생성기 : 항상 정답이 존재 (해밀턴 경로를 잘라 색 배정) ---------- */
+  function neighbors(cell){
+    const r=(cell/W)|0, c=cell%W, out=[];
+    if(r>0) out.push(cell-W); if(r<H-1) out.push(cell+W);
+    if(c>0) out.push(cell-1); if(c<W-1) out.push(cell+1);
+    return out;
+  }
+  function genPuzzle(size,colors,seed){
+    rnd = (seed==null) ? Math.random : mulberry32(seed>>>0);
+    W=H=size; N=W*H;
+    // 1) 지그재그 해밀턴 경로
+    let path=[];
+    for(let r=0;r<H;r++){
+      if(r%2===0) for(let c=0;c<W;c++) path.push(r*W+c);
+      else for(let c=W-1;c>=0;c--) path.push(r*W+c);
+    }
+    // 2) backbite 로 무작위화 (해밀턴 유지)
+    const posIdx=new Int32Array(N);
+    for(let i=0;i<N;i++) posIdx[path[i]]=i;
+    const iters=N*22;
+    for(let it=0;it<iters;it++){
+      if(rnd()<0.5){ path.reverse(); for(let i=0;i<N;i++) posIdx[path[i]]=i; }
+      const u=path[N-1], nb=neighbors(u);
+      const w=nb[(rnd()*nb.length)|0];
+      if(w===path[N-2]) continue;
+      const i=posIdx[w];
+      let lo=i+1, hi=N-1;
+      while(lo<hi){ const t=path[lo];path[lo]=path[hi];path[hi]=t;lo++;hi--; }
+      for(let k=i+1;k<N;k++) posIdx[path[k]]=k;
+    }
+    // 3) 색 개수만큼 조각내기 (각 조각 길이 >= 2)
+    numColors=Math.min(colors, PAL.length, Math.floor(N/2));
+    const base=Math.floor(N/numColors), rem=N%numColors, sizes=[];
+    for(let i=0;i<numColors;i++) sizes.push(base+(i<rem?1:0));
+    for(let s=0;s<numColors*3;s++){
+      const i=(rnd()*numColors)|0, j=(rnd()*numColors)|0;
+      if(i!==j && sizes[i]>2){ sizes[i]--; sizes[j]++; }
+    }
+    // 4) 상태 초기화 + 단자 배치
+    cellColor=new Int32Array(N).fill(-1);
+    endpointOf=new Int32Array(N).fill(-1);
+    colorPaths=[]; colorDone=[];
+    let idx=0;
+    for(let ci=0;ci<numColors;ci++){
+      const len=sizes[ci];
+      endpointOf[path[idx]]=ci;
+      endpointOf[path[idx+len-1]]=ci;
+      colorPaths.push([]); colorDone.push(false);
+      idx+=len;
+    }
+    buildBoard();
+    render(); updateHud();
+  }
+
+  function buildBoard(){
+    board.style.gridTemplateColumns=`repeat(${W},1fr)`;
+    board.style.gridTemplateRows=`repeat(${H},1fr)`;
+    board.classList.toggle('dense', W>=9);     // 9×9 이상은 간격·모서리를 줄여 칸을 확보
+    board.style.gap = W>=9 ? '3px' : '5px';
+    // overlay 는 유지, cell 만 재생성
+    board.querySelectorAll('.cell').forEach(e=>e.remove());
+    cellEls=[];
+    for(let i=0;i<N;i++){
+      const d=document.createElement('div');
+      d.className='cell';
+      board.insertBefore(d, document.getElementById('overlay'));
+      cellEls.push(d);
+    }
+  }
+
+  /* ---------- 렌더 ---------- */
+  function recomputeDone(){
+    for(let k=0;k<numColors;k++){
+      const p=colorPaths[k];
+      colorDone[k] = p.length>=2 && endpointOf[p[0]]===k && endpointOf[p[p.length-1]]===k && p[0]!==p[p.length-1];
+    }
+  }
+  function render(){
+    recomputeDone();
+    const conn=Array.from({length:N},()=>'');
+    for(let k=0;k<numColors;k++){
+      const p=colorPaths[k];
+      for(let i=0;i<p.length-1;i++){
+        const a=p[i], b=p[i+1], diff=b-a;
+        if(diff===1){ conn[a]+='r'; conn[b]+='l'; }
+        else if(diff===-1){ conn[a]+='l'; conn[b]+='r'; }
+        else if(diff===W){ conn[a]+='d'; conn[b]+='u'; }
+        else if(diff===-W){ conn[a]+='u'; conn[b]+='d'; }
+      }
+    }
+    for(let i=0;i<N;i++){
+      const el=cellEls[i], col=cellColor[i]; let html='';
+      if(col>=0){
+        const hex=PAL[col], done=colorDone[col];
+        const c=conn[i];
+        if(c.includes('u')) html+=`<span class="arm u" style="background:${hex}"></span>`;
+        if(c.includes('d')) html+=`<span class="arm d" style="background:${hex}"></span>`;
+        if(c.includes('l')) html+=`<span class="arm l" style="background:${hex}"></span>`;
+        if(c.includes('r')) html+=`<span class="arm r" style="background:${hex}"></span>`;
+        html+=`<span class="core${done?' done':''}" style="background:${hex}${done?';box-shadow:0 0 12px '+hex:''}"></span>`;
+      }
+      const ep=endpointOf[i];
+      if(ep>=0){
+        const hex=PAL[ep], done=colorDone[ep];
+        html+=`<span class="term${done?' done':''}" style="background:${hex}"></span>`;
+      }
+      el.innerHTML=html;
+    }
+  }
+
+  const el=id=>document.getElementById(id);
+  function setHint(){
+    el('hint').innerHTML = inPlay
+      ? '현장을 떠나도 시간은 흐릅니다 · 수리 완료 시 +'+PAY+'원, 재출동 없음'
+      : stage===1
+        ? '같은 색 <b class="em-brand">단자 두 개</b>를 손가락으로 이어보세요'
+        : '같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성';
+  }
+  function updateHud(){
+    recomputeDone();
+    let done=0; for(let k=0;k<numColors;k++) if(colorDone[k]) done++;
+    let filled=0; for(let i=0;i<N;i++) if(cellColor[i]>=0) filled++;
+    el('conn').textContent=done;
+    el('total').textContent=numColors;
+    el('fill').innerHTML=Math.round(filled/N*100)+'<small>%</small>';
+    el('bar').style.width=(done/numColors*100)+'%';
+
+    const s1=el('stage'), s3=el('points');
+    if(inPlay){                                        // 챌린지 진행 중
+      el('k1').textContent='정비 시간';  s1.className='v sm'; s1.textContent=fmt(elapsed());
+      el('k3').textContent='내 최고';    s3.className='v sm'; s3.textContent=fmt(myBest(chIndex));
+    } else {                                           // 온보딩
+      el('k1').textContent='교육 과정';
+      s1.className = stage<=ONBOARD_LEN ? 'v sm' : 'v';
+      s1.textContent = stage<=ONBOARD_LEN ? stage+' / '+ONBOARD_LEN : String(stage);
+      el('k3').textContent='적립 충전금'; s3.className='v';
+      s3.innerHTML=store.won.toLocaleString()+'<small>원</small>';
+    }
+  }
+
+  /* ---------- 드로잉 로직 ---------- */
+  function adjacent(a,b){
+    const ra=(a/W)|0, ca=a%W, rb=(b/W)|0, cb=b%W;
+    return (ra===rb && Math.abs(ca-cb)===1) || (ca===cb && Math.abs(ra-rb)===1);
+  }
+  function clearColor(k){ for(const idx of colorPaths[k]) cellColor[idx]=-1; colorPaths[k]=[]; }
+  function cutColor(m, atCell){
+    const p=colorPaths[m], j=p.indexOf(atCell); if(j<0) return;
+    for(let x=j;x<p.length;x++) if(cellColor[p[x]]===m) cellColor[p[x]]=-1;
+    colorPaths[m]=p.slice(0,j);
+  }
+  function startColor(k, epCell){ clearColor(k); colorPaths[k]=[epCell]; cellColor[epCell]=k; }
+  function grabPath(k, cell){
+    const p=colorPaths[k], j=p.indexOf(cell); if(j<0) return;
+    for(let x=j+1;x<p.length;x++) cellColor[p[x]]=-1;
+    colorPaths[k]=p.slice(0,j+1);
+  }
+
+  function step(target){
+    const k=active, p=colorPaths[k], head=p[p.length-1];
+    if(target===head || !adjacent(target,head)) return;
+    if(p.length>=2 && target===p[p.length-2]){ cellColor[p.pop()]=-1; render(); updateHud(); return; }
+    const inIdx=p.indexOf(target);
+    if(inIdx>=0){ for(let x=p.length-1;x>inIdx;x--) cellColor[p[x]]=-1; colorPaths[k]=p.slice(0,inIdx+1); render(); return; }
+    const tEp=endpointOf[target];
+    if(tEp>=0 && tEp!==k) return;                 // 다른 색 단자는 통과 불가
+    const tc=cellColor[target];
+    if(tc>=0 && tc!==k) cutColor(tc, target);      // 다른 케이블 위를 지나가면 끊김
+    cellColor[target]=k; p.push(target);
+    render(); updateHud(); checkWin();
+  }
+
+  function cellAt(e){
+    const rect=board.getBoundingClientRect();
+    const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(x<0||y<0||x>rect.width||y>rect.height) return null;
+    const c=Math.min(W-1,Math.max(0,Math.floor(x/(rect.width/W))));
+    const r=Math.min(H-1,Math.max(0,Math.floor(y/(rect.height/H))));
+    return r*W+c;
+  }
+
+  /* 길게 누르기·드래그로 뜨는 선택 메뉴(복사/잘라내기)와 컨텍스트 메뉴 차단.
+     오버레이 버튼은 정상 탭돼야 하므로 제외한다. */
+  const isBtn=t=>!!(t&&t.closest&&t.closest('button'));
+  board.addEventListener('touchstart',e=>{ if(!isBtn(e.target)) e.preventDefault(); },{passive:false});
+  board.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('selectstart',e=>e.preventDefault());
+  document.addEventListener('dragstart',e=>e.preventDefault());
+
+  board.addEventListener('pointerdown',e=>{
+    if(!isBtn(e.target)) e.preventDefault();
+    if(overlay.classList.contains('show')) return;
+    const cell=cellAt(e); if(cell==null) return;
+    board.setPointerCapture(e.pointerId);
+    const ep=endpointOf[cell], col=cellColor[cell];
+    if(ep>=0){ active=ep; startColor(ep,cell); drawing=true; }
+    else if(col>=0){ active=col; grabPath(col,cell); drawing=true; }
+    else return;
+    render(); updateHud();
+  });
+  board.addEventListener('pointermove',e=>{
+    if(!drawing) return; e.preventDefault();
+    const cell=cellAt(e); if(cell!=null) step(cell);
+  },{passive:false});
+  window.addEventListener('pointerup',()=>{
+    if(drawing) saveProgress();          // 이어서 풀기용 진행 상황 저장
+    drawing=false; active=-1;
+  });
+
+  /* ================= 모드 / 화면 전환 ================= */
+  const overlay=el('overlay');
+  let mode='onboard';        // 'onboard' | 'challenge'
+  let chIndex=-1;            // 진행 중인 챌린지 번호
+  let inPlay=false;          // 챌린지 보드를 실제로 풀고 있는 중
+  let onboardSnap=null;      // 탭 이동 시 온보딩 판 보존
+
+  function snapshot(){
+    return { W,H,N,numColors, stage,
+             cellColor:Int32Array.from(cellColor), endpointOf:Int32Array.from(endpointOf),
+             colorPaths:colorPaths.map(p=>p.slice()) };
+  }
+  function restore(s){
+    W=s.W; H=s.H; N=s.N; numColors=s.numColors; stage=s.stage;
+    cellColor=Int32Array.from(s.cellColor); endpointOf=Int32Array.from(s.endpointOf);
+    colorPaths=s.colorPaths.map(p=>p.slice()); colorDone=new Array(numColors).fill(false);
+    buildBoard(); render(); updateHud();
+  }
+
+  /* ---------- 타이머 : 판이 열리는 순간부터 카운트 ---------- */
+  let chStart=0, chTick=null, chRunning=false, chFinal=0;
+  function elapsed(){ return chRunning ? Date.now()-chStart : chFinal; }
+  function startTimer(fromTs){               // 이어서 풀기면 최초 입장 시각을 그대로 이어받음
+    chStart=fromTs||Date.now(); chFinal=0; chRunning=true;
+    clearInterval(chTick); chTick=setInterval(updateHud,100); updateHud();
+  }
+  function stopTimer(){ if(chRunning) chFinal=Date.now()-chStart; chRunning=false; clearInterval(chTick); chTick=null; }
+
+  /* ---------- 탭 ---------- */
+  function renderTabs(){
+    // 온보딩을 끝내면 탭 자체가 사라지고 랭킹전만 남는다
+    el('tabs').style.display = store.unlocked ? 'none' : '';
+    if(store.unlocked) return;
+    el('tab-onboard').classList.toggle('active', mode==='onboard');
+    el('tab-challenge').classList.toggle('active', mode==='challenge');
+    const lock=el('tab-lock'); lock.className='lock'; lock.textContent='🔒';
+  }
+  function showView(v){
+    el('view-lobby').classList.toggle('on', v==='lobby');
+    el('view-game').classList.toggle('on', v==='game');
+  }
+
+  function goOnboard(){
+    saveProgress(); stopTimer(); stopLobbyTick();
+    mode='onboard'; inPlay=false; chIndex=-1;
+    el('playbar').classList.remove('on');
+    el('controls').classList.remove('solo');
+    showView('game'); renderTabs();
+    if(onboardSnap) restore(onboardSnap); else { const p=params(stage); genPuzzle(p.size,p.colors); }
+    setHint();
+  }
+  function goLobby(){
+    if(mode==='onboard') onboardSnap=snapshot();
+    saveProgress(); stopTimer();               // 나가도 start 시각은 유지 → 타이머 계속
+    mode='challenge'; inPlay=false; chIndex=-1;
+    el('playbar').classList.remove('on');
+    el('controls').classList.remove('solo');
+    showView('lobby'); renderTabs(); renderLobby(); startLobbyTick();
+  }
+
+  /* ---------- 로비 ---------- */
+  let lobbyTick=null;
+  function startLobbyTick(){                 // 진행 중인 판의 경과 시간만 갱신
+    clearInterval(lobbyTick);
+    lobbyTick=setInterval(()=>{
+      const rec=todayRec();
+      CHALLENGES.forEach((c,i)=>{
+        const r=rec[i]; if(!r || r.ms!=null) return;
+        const n=el('rc'+i);
+        if(n) n.innerHTML='<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 하기';
+      });
+    }, 200);
+  }
+  function stopLobbyTick(){ clearInterval(lobbyTick); lobbyTick=null; }
+
+  function renderLobby(){
+    const d=new Date();
+    el('ch-date').textContent=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+    const list=el('ch-list');
+
+    if(!store.unlocked){
+      const cur=Math.min(store.maxStage, ONBOARD_LEN);
+      list.innerHTML=
+        '<div class="locked">'+
+          '<div class="ico">🔒</div>'+
+          '<h3>정비 교육 '+ONBOARD_LEN+'과정을 먼저 이수하세요</h3>'+
+          '<p>교육을 이수하면 매일 3건의 정비 요청이 배정됩니다.<br>1건 수리할 때마다 <b class="em-warn">'+PAY+'원</b>씩 충전 포인트로 적립돼요.</p>'+
+          '<div class="lbar"><i style="width:'+(cur/ONBOARD_LEN*100)+'%"></i></div>'+
+          '<div class="lnum">'+cur+' / '+ONBOARD_LEN+' 과정</div>'+
+        '</div>';
+      return;
+    }
+
+    const rec=todayRec(), nDone=doneCount(), allDone=nDone===CHALLENGES.length;
+
+    let html='';
+
+    // 지난 시즌 보상 안내 (한 번만)
+    const ls=store.lastSeason;
+    if(ls && !ls.seen){
+      const icon = ls.prize ? '🏆' : (ls.short ? '🔒' : '📋');
+      html+='<div class="prizebar'+(ls.prize?'':' none')+'" id="prizebar">'+icon+' <span>'+
+        seasonLabel(ls.key)+' 시즌 <b>'+ls.rank+'위</b> · '+ls.pts+'점'+
+        (ls.prize ? '<br>보상 <b>'+ls.prize.toLocaleString()+'P</b> 적립 완료'
+          : ls.short ? '<br>최소 '+SEASON_MIN_PTS+'점에 미달해 보상이 지급되지 않았어요'
+                     : '<br>보상 순위(100위) 밖이라 보상이 없어요')+
+        '</span><button class="x" id="prize-x">✕</button></div>';
+    }
+
+    html+=
+      '<div class="wallet">'+
+        '<div><span class="wk">오늘 적립</span>'+
+          '<span class="wv">'+wonToday()+'<small>원</small>'+
+          '<span class="wmax"> / '+(CHALLENGES.length*PAY)+'원</span></span></div>'+
+        '<div class="wr"><span class="wk">누적</span>'+
+          '<span class="wv2">'+store.won.toLocaleString()+'<small>원</small></span></div>'+
+      '</div>'+
+      '<button class="season-card" id="season-card">'+
+        '<span><span class="sck">'+seasonLabel(store.season.key)+' 시즌</span>'+
+          '<span class="scv">'+mySeasonRank()+'<small>위</small></span></span>'+
+        '<span><span class="sck">누적 점수</span>'+
+          '<span class="scv2">'+store.season.pts+'<small>점</small></span>'+
+          '<span class="scmax"> / '+SEASON_MIN_PTS+'점</span></span>'+
+        '<span class="sc-r">'+(store.season.pts>=SEASON_MIN_PTS?'🏆':'🔒')+'</span>'+
+      '</button>'+
+      '<div class="quota">'+
+        CHALLENGES.map((c,i)=>'<i class="'+((rec[i]&&rec[i].ms!=null)?'on':'')+'"></i>').join('')+
+        '<span>오늘 '+nDone+' / '+CHALLENGES.length+'건 수리 완료</span>'+
+      '</div>';
+
+    html+=CHALLENGES.map((c,i)=>{
+      const r=rec[i];
+      const done   = !!(r && r.ms!=null);
+      const inProg = !!(r && r.ms==null);
+      const info = done   ? '내 기록 <b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i> · <s>+'+PAY+'원 적립됨</s>'
+                 : inProg ? '<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 하기'
+                 : '미출동 · 도착하면 바로 시간 카운트 · +'+PAY+'원';
+      return '<button class="ch-card'+(done?' cleared':'')+(inProg?' prog':'')+'" data-i="'+i+'">'+
+        '<span class="no">'+(done?'✓':(i+1))+'</span>'+
+        '<span><span class="nm">'+c.name+'</span>'+
+          '<span class="mt">'+c.tag+' · '+c.size+'×'+c.size+'</span>'+
+          '<span class="rc" id="rc'+i+'">'+info+'</span></span>'+
+        '<span class="go">'+(done?'🏆':'▶')+'</span></button>';
+    }).join('');
+
+    if(allDone) html+='<div class="alldone">오늘 '+CHALLENGES.length+'건을 모두 수리했어요 · '+
+      '<b>'+wonToday()+'원</b> 적립<br><span>내일 자정에 새 정비 요청 3건이 배정됩니다</span></div>';
+
+    html+='<button class="btn btn-expanded" id="see-rank">🏆 오늘의 랭킹 보기</button>';
+    list.innerHTML=html;
+
+    list.querySelectorAll('.ch-card').forEach(b=>{
+      const i=+b.dataset.i, r=rec[i];
+      b.onclick = (r && r.ms!=null) ? (()=>openRank(i)) : (()=>openChallenge(i));   // 수리 완료 후엔 랭킹만
+    });
+    el('see-rank').onclick=()=>openRank(0);
+    el('season-card').onclick=openSeason;
+    const px=el('prize-x');
+    if(px) px.onclick=e=>{ e.stopPropagation(); store.lastSeason.seen=true; persist(); renderLobby(); };
+  }
+
+  /* ---------- 챌린지 입장 (신규 / 이어서) ---------- */
+  function openChallenge(i){
+    const rec=todayRec();
+    if(rec[i] && rec[i].ms!=null){ openRank(i); return; }        // 재참여 차단
+    stopLobbyTick();
+    mode='challenge'; chIndex=i; inPlay=true;
+    const c=CHALLENGES[i];
+
+    if(!rec[i]) rec[i]={ start:Date.now(), ms:null, paid:false, paths:null };
+    persist();
+
+    el('playbar').classList.add('on');
+    el('play-title').textContent='정비 요청 '+(i+1)+' · '+c.name;
+    setHint();
+    el('controls').classList.add('solo');                        // 챌린지엔 '새 판' 없음
+    showView('game'); renderTabs();
+
+    genPuzzle(c.size, c.colors, hashStr(todayKey()+'#'+i));      // 날짜+번호 시드 = 모두 같은 문제
+    restoreProgress(rec[i]);
+    startTimer(rec[i].start);
+  }
+
+  /* 이어서 풀기 : 그려둔 선 복원 */
+  function restoreProgress(r){
+    if(!r.paths || r.paths.length!==numColors) return;
+    colorPaths=r.paths.map(p=>p.slice());
+    cellColor.fill(-1);
+    colorPaths.forEach((p,k)=>p.forEach(c=>{ if(c>=0&&c<N) cellColor[c]=k; }));
+    render(); updateHud();
+  }
+  function saveProgress(){
+    if(!inPlay) return;
+    const r=todayRec()[chIndex];
+    if(!r || r.ms!=null) return;
+    r.paths=colorPaths.map(p=>Array.from(p));
+    persist();
+  }
+
+  /* ---------- 랭킹 시트 ---------- */
+  const sheet=el('sheet');
+  let sheetMode='today', pendingResult=null;
+
+  function setSheetMode(m){
+    sheetMode=m;
+    el('pane-today' ).style.display = m==='today' ?'block':'none';
+    el('pane-season').style.display = m==='season'?'block':'none';
+    el('pane-guide' ).style.display = m==='guide' ?'block':'none';
+    el('rank-mode'  ).style.display = m==='guide' ?'none':'flex';
+    el('rank-result').style.display = m==='guide' ?'none':'block';
+    [...el('rank-mode').children].forEach(b=>b.classList.toggle('on', b.dataset.m===m));
+    if(m==='season') renderSeason();
+    const b=el('sheet-close');
+    if(m==='guide'){ b.textContent='← 시즌 랭킹'; b.classList.remove('primary'); }
+    else if(pendingResult){ b.textContent='출동 목록으로'; b.classList.add('primary'); }
+    else { b.textContent='닫기'; b.classList.remove('primary'); }
+  }
+
+  function renderSeason(){
+    const s=store.season, board=seasonBoard(), rank=board.findIndex(x=>x.me)+1;
+    const endK=seasonLastDay(s.key), left=dateKeys(todayKey(),endK).length-1;
+    el('season-title').textContent=seasonLabel(s.key)+' 시즌';
+    el('season-sub').textContent='SEASON RANKING · '+(left>0?'D-'+left:'FINAL DAY');
+    el('myseason').innerHTML=
+      '<div><span class="l">내 순위</span><span class="v">'+rank+'<small>위</small></span></div>'+
+      '<div class="r"><span class="l">누적 점수</span><span class="v">'+s.pts+'<small>점</small></span></div>';
+
+    // 보상 자격 (최소 점수)
+    const need=Math.max(0, SEASON_MIN_PTS-s.pts), qualified=need===0;
+    el('qual').className='qual'+(qualified?' done':'');
+    el('qual').innerHTML=
+      '<div class="qt"><span>보상 자격</span>'+
+        '<span><b>'+Math.min(s.pts,SEASON_MIN_PTS)+'</b> / '+SEASON_MIN_PTS+'점</span></div>'+
+      '<div class="qbar"><i style="width:'+Math.min(100, s.pts/SEASON_MIN_PTS*100)+'%"></i></div>'+
+      '<div class="qm">'+(qualified
+        ? '✓ 보상 자격을 확보했어요. 시즌 종료 시 순위대로 지급됩니다.'
+        : '시즌 보상은 <b class="em-warn">'+SEASON_MIN_PTS+'점 이상</b>부터 받을 수 있어요. '+
+          '<b class="em-warn">'+need+'점</b> 남았습니다.')+'</div>';
+    el('season-list').innerHTML=board.map((r,i)=>{
+      const g=i<3?' g'+(i+1):'';
+      return '<li class="'+(r.me?'me':'')+'">'+
+        '<span class="p'+g+'">'+(i+1)+'</span>'+
+        '<span class="nm2">'+r.name+'</span>'+
+        '<span class="pt2">'+r.pts+'<small> 점</small></span></li>';
+    }).join('');
+    const prize=prizeOf(rank, s.pts);
+    el('season-foot').innerHTML = '시즌 종료까지 <b>'+(left>0?left+'일':'오늘까지')+'</b>'+
+      (prize ? ' · 지금 순위 유지 시 <b>'+prize.toLocaleString()+'P</b>'
+             : (qualified ? '' : ' · 최소 점수 미달 시 <b>보상 없음</b>'));
+  }
+
+  function openSeason(){ pendingResult=null; el('rank-result').innerHTML=''; setSheetMode('season'); sheet.classList.add('show'); }
+
+  function openRank(ci, result){
+    el('rank-title').textContent=CHALLENGES[ci].name+' 수리 랭킹';
+    el('rank-sub').textContent=todayKey()+' · FASTEST TIME';
+
+    const rk=myRank(ci), left=CHALLENGES.length-doneCount();
+    el('rank-result').innerHTML = !result ? '' :
+      '<div class="result">'+
+        '<div class="rbig">수리 완료</div>'+
+        '<div class="rtime">'+fmt(result.ms)+'</div>'+
+        '<div class="rrow"><span>오늘 <b>'+rk+'위</b></span>'+
+          (result.paid?'<span class="pay">+'+PAY+'원 적립</span>':'')+
+          (result.sp?'<span class="sp">시즌 +'+result.sp+'점</span>':'')+
+          '<span>'+(left?'남은 요청 '+left:'오늘 완료')+'</span></div>'+
+      '</div>';
+
+    el('rank-list').innerHTML=leaderboard(ci).map((r,i)=>{
+      const g=i<3?' g'+(i+1):'';
+      return '<li class="'+(r.me?'me':'')+'">'+
+        '<span class="p'+g+'">'+(r.ms==null?'-':(i+1))+'</span>'+
+        '<span class="nm2">'+r.name+'</span>'+
+        '<span class="tm'+(r.ms==null?' non':'')+'">'+(r.ms==null?'미완료':fmt(r.ms))+'</span></li>';
+    }).join('');
+
+    const sw=el('rank-switch');
+    sw.innerHTML=CHALLENGES.map((c,i)=>'<button class="'+(i===ci?'on':'')+'" data-i="'+i+'">'+(i+1)+'. '+c.name+'</button>').join('');
+    sw.querySelectorAll('button').forEach(b=>b.onclick=()=>openRank(+b.dataset.i));
+
+    pendingResult=result||null;
+    setSheetMode('today');
+    sheet.classList.add('show');
+    const me=el('rank-list').querySelector('.me');
+    if(me) setTimeout(()=>me.scrollIntoView({block:'nearest'}), 60);
+  }
+  function closeSheet(){ sheet.classList.remove('show'); pendingResult=null; }
+  sheet.onclick=e=>{ if(e.target===sheet) closeSheet(); };
+  el('sheet-close').onclick=()=>{ if(sheetMode==='guide') setSheetMode('season'); else closeSheet(); };
+  el('season-info').onclick=()=>setSheetMode('guide');
+  [...el('rank-mode').children].forEach(b=>b.onclick=()=>setSheetMode(b.dataset.m));
+
+  /* ================= 승리 처리 ================= */
+  function checkWin(){
+    recomputeDone();
+    for(let k=0;k<numColors;k++) if(!colorDone[k]) return;
+    for(let i=0;i<N;i++) if(cellColor[i]<0) return;   // 모든 칸 채움 필요
+    win();
+  }
+  function setOverlay(o){
+    overlay.querySelector('.big').textContent=o.big;
+    el('o-head').textContent=o.head;
+    el('o-reward').innerHTML=o.reward;
+    el('o-desc').innerHTML=o.desc;
+    const L=el('o-restart'), R=el('o-next');
+    L.style.display = o.left ? '' : 'none';
+    if(o.left){ L.textContent=o.left.t; L.onclick=o.left.fn; }
+    R.textContent=o.right.t; R.onclick=o.right.fn;
+    setTimeout(()=>overlay.classList.add('show'), 420);
+  }
+  function win(){ inPlay ? winChallenge() : winOnboard(); }
+
+  function winOnboard(){
+    // 각 단계 최초 클리어에만 지급 → '처음부터'로 되돌려도 재지급 없음
+    const paid = (stage<=ONBOARD_LEN && stage>store.paidStage);
+    if(paid){ store.paidStage=stage; store.won+=PAY; }
+    if(stage+1>store.maxStage) store.maxStage=stage+1;
+    const justUnlocked = (stage>=ONBOARD_LEN && !store.unlocked);
+    if(justUnlocked) store.unlocked=true;
+    persist(); if(paid) awardPoints(PAY,'onboarding-'+stage); updateHud(); renderTabs();
+
+    const rw = paid ? '+'+PAY+'<span class="p">원</span>'
+                    : '<span class="em-mute">연습</span>';
+    if(justUnlocked){
+      setOverlay({ big:'교육 이수', head:'정비사 자격 획득!', reward:rw,
+        desc:'이제부터 <b>매일 3건</b>의 정비 요청이 배정됩니다.<br>수리할 때마다 <b class="em-warn">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
+        left:null,
+        right:{t:'현장 출동', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
+    } else {
+      setOverlay({ big:'수리 완료', head:'교육 '+stage+'과정 수료', reward:rw,
+        desc: paid ? '충전 포인트 '+PAY+'원이 적립됐습니다.<br>누적 <b>'+store.won.toLocaleString()+'원</b>'
+                   : '이미 이수한 과정이라 이번엔 지급되지 않아요.',
+        left:{t:'처음부터', fn:resetOnboard}, right:{t:'다음 과정', fn:nextStage} });
+    }
+  }
+
+  function winChallenge(){
+    stopTimer();
+    const ms=chFinal, i=chIndex, r=todayRec()[i];
+    r.ms=ms; r.paths=null;                       // 완주 확정 → 재도전 불가
+    let paid=false, sp=0;
+    if(!r.paid){
+      r.paid=true; paid=true;
+      store.won+=PAY; awardPoints(PAY,'repair-'+(i+1));
+      sp=SEASON_PTS(myRank(i));                  // 그날 순위 → 시즌 점수 누적
+      r.sp=sp; store.season.pts+=sp;
+    } else sp=r.sp||0;
+    persist(); updateHud();
+    // 수리를 마치면 보드에 머물지 않고 곧장 랭킹으로. 닫으면 출동 목록.
+    setTimeout(()=>{ goLobby(); openRank(i,{ ms:ms, paid:paid, sp:sp }); }, 700);
+  }
+
+  function nextStage(){ overlay.classList.remove('show'); stage++; onboardSnap=null;
+    const p=params(stage); genPuzzle(p.size,p.colors); setHint(); }
+  function resetOnboard(){ overlay.classList.remove('show'); stage=1; onboardSnap=null;
+    const p=params(1); genPuzzle(p.size,p.colors); setHint(); }
+  function params(s){
+    if(s<=ONBOARD_LEN) return ONBOARD_STEPS[s-1];
+    const k=s-ONBOARD_LEN;                     // 온보딩 이후 = 무보상 연습, 계속 커짐
+    return { size:Math.min(10, 7+Math.floor(k/2)), colors:Math.min(PAL.length, 6+Math.floor(k/2)) };
+  }
+
+  /* ===== 실제 앱 연동 지점 =====
+     서버에서 반드시 재검증할 것: 하루 3판 상한, 판별 1회 지급, 완주 여부.
+     클라이언트 localStorage 는 조작 가능하므로 지급 근거로 쓰면 안 됨.        */
+  function awardPoints(won, src){
+    // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', won:won, src:src, date:todayKey()}, '*');
+    console.log('[충전기 정비사] 충전 포인트 적립 요청:', won+'원', '('+src+')');
+  }
+
+  /* ================= 버튼 배선 ================= */
+  el('clear').onclick=()=>{ for(let k=0;k<numColors;k++) clearColor(k); render(); updateHud(); saveProgress(); };
+  el('newp').onclick=()=>{ const p=params(stage); genPuzzle(p.size,p.colors); };   // 온보딩 전용
+  el('back').onclick=goLobby;
+  el('tab-onboard').onclick=goOnboard;
+  el('tab-challenge').onclick=goLobby;
+
+  /* ---------- 첫판 가이드 ---------- */
+  const tut=el('tut'), slides=[...tut.querySelectorAll('.slide')], dots=[...tut.querySelectorAll('.dots i')];
+  const LAST=slides.length-1;
+  let slide=0;
+  function showSlide(n){
+    slide=Math.max(0,Math.min(LAST,n));
+    slides.forEach((s,i)=>s.classList.toggle('on', i===slide));
+    dots.forEach((d,i)=>d.classList.toggle('on', i===slide));
+    el('tut-prev').classList.toggle('hide', slide===0);
+    el('tut-go').textContent = slide===LAST ? '정비 시작' : '다음';
+    tut.querySelector('.tut-in').scrollTop=0;
+  }
+  function openTut(n){ showSlide(n==null?0:n); tut.classList.add('show'); }
+  function closeTut(){ tut.classList.remove('show'); store.seenTut=true; persist(); }
+  el('tut-prev').onclick=()=>showSlide(slide-1);
+  el('tut-go').onclick=()=>{ if(slide<LAST) showSlide(slide+1); else closeTut(); };
+  el('help').onclick=()=>openTut(store.seenTut ? LAST : 0);   // 재열람은 조작법부터
+  tut.onclick=e=>{ if(e.target===tut && store.seenTut) closeTut(); };
+
+  /* ===== 테스트용 숨은 단축키 (배포 전 DEV=false) =====
+     · 번개 아이콘 탭      → 전체 초기화
+     · 가이드의 'HOW TO PLAY' 중 Y 탭 → 온보딩 건너뛰고 랭킹전으로   */
+  if(DEV){
+    el('plug').onclick=()=>{
+      if(inPlay) return;                       // 진행 중인 랭킹전은 보호
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      location.replace(location.href.split(/[?#]/)[0]);
+    };
+    el('skip-y').onclick=e=>{
+      e.stopPropagation();
+      store.unlocked=true;
+      store.paidStage=ONBOARD_LEN;             // 건너뛴 단계는 지급 완료 처리 (소급 지급 차단)
+      store.maxStage=ONBOARD_LEN+1;
+      store.seenTut=true;
+      persist();
+      tut.classList.remove('show');
+      goLobby();
+    };
+  }
+  window.addEventListener('pagehide', saveProgress);
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveProgress(); });
+
+  /* ================= 초기화 ================= */
+  ensureSeason();                               // 달이 바뀌었으면 이전 시즌 정산
+  if(store.unlocked){
+    // 온보딩을 마친 사용자는 랭킹전 홈으로 바로 진입 (온보딩은 다시 안 보임)
+    mode='challenge';
+    showView('lobby'); renderTabs(); renderLobby(); startLobbyTick();
+  } else {
+    stage=Math.max(1, Math.min(ONBOARD_LEN, store.maxStage||1));
+    renderTabs();
+    const p0=params(stage); genPuzzle(p0.size,p0.colors); setHint();
+    if(!store.seenTut) openTut();             // 첫 판에는 가이드부터
+  }
+})();
+</script>
+</body>
+</html>

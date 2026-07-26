@@ -7,9 +7,36 @@
 
 ## 플레이
 
-👉 **https://ian939.github.io/circuit-connect/**
+두 가지 버전이 나란히 배포돼 있습니다. 기능은 완전히 동일하고 **외형만 다릅니다.**
 
-또는 `index.html`을 브라우저에서 그냥 열면 됩니다.
+| 버전 | 링크 | 설명 |
+| --- | --- | --- |
+| 오리지널 | **https://ian939.github.io/circuit-connect/** | 다크 네온 테마 (`index.html`) |
+| SK일렉링크 DS | **https://ian939.github.io/circuit-connect/skel.html** | 디자인 시스템 1.0 적용 (`skel.html`) |
+
+## SK일렉링크 디자인 시스템 1.0 적용 (`skel.html`)
+
+[디자인 시스템 문서](https://appweb.electlinkdev.com/design-system/for-ai)의 `llms.txt` 규칙을 그대로 적용한 버전입니다.
+로직·JS는 오리지널과 **한 줄도 다르지 않고**, 토큰과 스타일만 교체했습니다.
+
+| 항목 | 적용 |
+| --- | --- |
+| 색 | 라이트 테마. `brand.solid #7b42ff` / `bg.base #f3f4f6` / `bg.elevated #fff` / text 3단계 / status 3종 |
+| 서체 | Pretendard 단일. 타입 스케일 **6단계(28·22·18·16·14·12)만** 사용 |
+| 간격 | 전부 4px 배수. 화면 좌우 패딩 16px |
+| 라운드 | `--r-sm/md/lg/xl/full` 5단계만 |
+| 그림자 | `--e1/e2/e3` 3단계만. 그림자와 보더를 동시에 쓰지 않음 |
+| 컴포넌트 | SkelButton(h56·r16·화면당 primary 1개) / SkelCard(r20·p20) / SkelBadge(pill·tone) / SkelSection 규칙 준수 |
+
+숫자는 별도 모노 서체 대신 Pretendard의 `tabular-nums`로 정렬해 "서체는 Pretendard 하나" 원칙을 지켰습니다.
+
+> ⚠️ **한 곳은 의도적으로 팔레트 밖 색을 씁니다 — 게임 보드의 배선 8색.**
+> 색 맞추기 퍼즐이라 서로 구분되는 8색이 게임 규칙 자체이고, 브랜드 퍼플과 그레이만으로는 성립하지 않습니다.
+> UI 크롬은 100% 토큰을 따르고, 배선은 **UI 토큰이 아닌 게임 데이터**로 취급했습니다.
+> 그마저도 1번 색을 `brand.solid`로, 2~4번을 `status` 3색으로 두고 나머지만 색상환을 벌려 밝은 표면에 맞게 재조정했습니다.
+> `--w1 ~ --w8` 변수 한 곳에 모아뒀습니다.
+
+또는 `index.html` / `skel.html`을 브라우저에서 그냥 열면 됩니다.
 
 ## 스토리
 
