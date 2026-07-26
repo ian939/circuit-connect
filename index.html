@@ -239,6 +239,23 @@
   .myseason .v small{font-size:12px;}
   .myseason .r{text-align:right;}
   .myseason .r .v{color:var(--amber);}
+  /* 보상 자격 게이지 */
+  .qual{background:#00000026;border:1px solid #ffffff0d;border-radius:13px;
+    padding:11px 13px;margin-bottom:12px;}
+  .qual .qt{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);
+    letter-spacing:.06em;margin-bottom:8px;}
+  .qual .qt b{color:var(--ink);font-size:12px;}
+  .qual .qbar{height:8px;border-radius:5px;background:var(--slot);overflow:hidden;border:1px solid #00000030;}
+  .qual .qbar>i{display:block;height:100%;border-radius:5px;
+    background:linear-gradient(90deg,#FFB84D,#FFD86B);box-shadow:0 0 10px #FFB84D88;
+    transition:width .4s cubic-bezier(.2,.7,.2,1);}
+  .qual.done{border-color:#41E6E040;background:#41E6E00f;}
+  .qual.done .qbar>i{background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));box-shadow:0 0 10px var(--cyan);}
+  .qual.done .qt{color:var(--cyan);}
+  .qual .qm{font-size:11px;color:var(--muted2);margin-top:8px;line-height:1.5;}
+  .qual.done .qm{color:var(--cyan);}
+
   .season-foot{font-size:11px;color:var(--muted2);text-align:center;margin-top:10px;line-height:1.6;}
   .season-foot b{color:var(--muted);}
   .rank .pt2{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:700;color:var(--amber);}
@@ -253,6 +270,9 @@
   .gsec p{margin:0;font-size:12.5px;line-height:1.7;color:var(--muted);}
   .gsec em{font-style:normal;color:var(--ink);font-weight:600;}
   .gnote{margin-top:8px!important;font-size:11.5px!important;color:var(--muted2)!important;}
+  .warn{background:#FFB84D14;border:1px solid #FFB84D40;border-radius:11px;padding:11px 12px;
+    font-size:12.5px;line-height:1.6;color:var(--ink);margin-bottom:10px;}
+  .warn em{font-style:normal;color:var(--amber);font-weight:700;}
   .gtable{width:100%;border-collapse:separate;border-spacing:0 5px;margin-top:10px;
     font-family:"IBM Plex Mono",monospace;font-size:12.5px;}
   .gtable th{text-align:left;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
@@ -282,12 +302,16 @@
   .season-card .scv2{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:700;color:var(--amber);line-height:1;}
   .season-card small{font-size:11px;}
   .season-card .sc-r{font-size:20px;opacity:.85;}
+  .season-card .scmax{font-size:11px;color:var(--muted2);font-weight:500;
+    font-family:"IBM Plex Mono",monospace;}
 
   .prizebar{display:flex;align-items:center;gap:10px;background:#FFB84D14;border:1px solid #FFB84D3d;
     border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:12.5px;line-height:1.5;}
   .prizebar .x{margin-left:auto;flex:none;border:0;background:transparent;color:var(--muted);
     font-size:17px;cursor:pointer;padding:0 2px;}
   .prizebar b{color:var(--amber);font-family:"IBM Plex Mono",monospace;}
+  .prizebar.none{background:#8785BE14;border-color:var(--line);color:var(--muted);}
+  .prizebar.none b{color:var(--ink);}
 
   .rswitch{display:flex;gap:5px;background:#00000033;border:1px solid var(--line);
     border-radius:12px;padding:4px;margin:0 0 13px;}
@@ -536,6 +560,7 @@
         <button class="info" id="season-info">ⓘ 랭킹 안내</button>
       </div>
       <div class="myseason" id="myseason"></div>
+      <div class="qual" id="qual"></div>
       <ol class="rank" id="season-list"></ol>
       <div class="season-foot" id="season-foot"></div>
     </div>
@@ -568,6 +593,8 @@
 
       <div class="gsec">
         <div class="gh"><b>3</b> 시즌 보상</div>
+        <div class="warn">⚠ 시즌 보상은 <em>누적 100점 이상</em>을 확보해야 받을 수 있습니다.<br>
+          100점 미만이면 순위와 관계없이 보상이 지급되지 않습니다.</div>
         <p>시즌 종료 시 <em>최종 누적 점수</em> 순위로 충전 포인트를 지급합니다.
           보상은 다음 시즌 시작과 함께 자동 적립됩니다.</p>
         <table class="gtable prize">
@@ -578,7 +605,8 @@
           <tr><td>4~10위</td><td><b>1,000P</b></td></tr>
           <tr><td>11~100위</td><td><b>500P</b></td></tr>
         </table>
-        <p class="gnote">1P = 1원으로 충전 시 사용할 수 있습니다.</p>
+        <p class="gnote">1P = 1원으로 충전 시 사용할 수 있습니다.<br>
+          100점은 <em>하루 3건을 꾸준히 수리하면 약 10일</em>이면 도달합니다 (하루 최대 15점).</p>
       </div>
 
       <div class="gsec">
@@ -716,7 +744,12 @@
      · 시즌 종료 시 최종 순위로 충전 포인트 지급                        */
   const SEASON_PTS = r => r===1?5 : r===2?4 : r===3?3 : r<=10?2 : 1;
   const SEASON_PRIZE = [ {to:1,p:5000}, {to:2,p:3000}, {to:3,p:2000}, {to:10,p:1000}, {to:100,p:500} ];
-  function prizeOf(rank){ for(const t of SEASON_PRIZE) if(rank<=t.to) return t.p; return 0; }
+  const SEASON_MIN_PTS = 100;                  // 이 점수를 넘겨야 시즌 보상 대상
+  function prizeOf(rank, pts){
+    if(pts!=null && pts<SEASON_MIN_PTS) return 0;   // 최소 점수 미달 → 순위와 무관하게 보상 없음
+    for(const t of SEASON_PRIZE) if(rank<=t.to) return t.p;
+    return 0;
+  }
 
   // 봇들의 시즌 누적 점수. 날짜 시드라 언제 계산해도 같은 값이 나온다.
   function botSeasonPts(fromK, toK){
@@ -750,9 +783,10 @@
     if(!store.season || !store.season.key){ store.season={ key:sk, pts:0, since:todayKey() }; persist(); return; }
     if(store.season.key===sk) return;
     const prev=store.season;
-    const rank=mySeasonRank(prev), prize=prizeOf(rank);
+    const rank=mySeasonRank(prev), prize=prizeOf(rank, prev.pts);
     if(prize){ store.won+=prize; awardPoints(prize,'season-'+prev.key+'-rank'+rank); }
-    store.lastSeason={ key:prev.key, rank:rank, pts:prev.pts, prize:prize, seen:false };
+    store.lastSeason={ key:prev.key, rank:rank, pts:prev.pts, prize:prize,
+                       short: prev.pts<SEASON_MIN_PTS, seen:false };
     store.season={ key:sk, pts:0, since:todayKey() };
     persist();
   }
@@ -1066,8 +1100,12 @@
     // 지난 시즌 보상 안내 (한 번만)
     const ls=store.lastSeason;
     if(ls && !ls.seen){
-      html+='<div class="prizebar" id="prizebar">🏆 <span>'+seasonLabel(ls.key)+' 시즌 <b>'+ls.rank+'위</b>'+
-        (ls.prize? ' · 보상 <b>'+ls.prize.toLocaleString()+'P</b> 적립 완료' : ' · 보상 없음')+
+      const icon = ls.prize ? '🏆' : (ls.short ? '🔒' : '📋');
+      html+='<div class="prizebar'+(ls.prize?'':' none')+'" id="prizebar">'+icon+' <span>'+
+        seasonLabel(ls.key)+' 시즌 <b>'+ls.rank+'위</b> · '+ls.pts+'점'+
+        (ls.prize ? '<br>보상 <b>'+ls.prize.toLocaleString()+'P</b> 적립 완료'
+          : ls.short ? '<br>최소 '+SEASON_MIN_PTS+'점에 미달해 보상이 지급되지 않았어요'
+                     : '<br>보상 순위(100위) 밖이라 보상이 없어요')+
         '</span><button class="x" id="prize-x">✕</button></div>';
     }
 
@@ -1083,8 +1121,9 @@
         '<span><span class="sck">'+seasonLabel(store.season.key)+' 시즌</span>'+
           '<span class="scv">'+mySeasonRank()+'<small>위</small></span></span>'+
         '<span><span class="sck">누적 점수</span>'+
-          '<span class="scv2">'+store.season.pts+'<small>점</small></span></span>'+
-        '<span class="sc-r">🏆</span>'+
+          '<span class="scv2">'+store.season.pts+'<small>점</small></span>'+
+          '<span class="scmax"> / '+SEASON_MIN_PTS+'점</span></span>'+
+        '<span class="sc-r">'+(store.season.pts>=SEASON_MIN_PTS?'🏆':'🔒')+'</span>'+
       '</button>'+
       '<div class="quota">'+
         CHALLENGES.map((c,i)=>'<i class="'+((rec[i]&&rec[i].ms!=null)?'on':'')+'"></i>').join('')+
@@ -1187,6 +1226,18 @@
     el('myseason').innerHTML=
       '<div><span class="l">내 순위</span><span class="v">'+rank+'<small>위</small></span></div>'+
       '<div class="r"><span class="l">누적 점수</span><span class="v">'+s.pts+'<small>점</small></span></div>';
+
+    // 보상 자격 (최소 점수)
+    const need=Math.max(0, SEASON_MIN_PTS-s.pts), qualified=need===0;
+    el('qual').className='qual'+(qualified?' done':'');
+    el('qual').innerHTML=
+      '<div class="qt"><span>보상 자격</span>'+
+        '<span><b>'+Math.min(s.pts,SEASON_MIN_PTS)+'</b> / '+SEASON_MIN_PTS+'점</span></div>'+
+      '<div class="qbar"><i style="width:'+Math.min(100, s.pts/SEASON_MIN_PTS*100)+'%"></i></div>'+
+      '<div class="qm">'+(qualified
+        ? '✓ 보상 자격을 확보했어요. 시즌 종료 시 순위대로 지급됩니다.'
+        : '시즌 보상은 <b style="color:#FFB84D">'+SEASON_MIN_PTS+'점 이상</b>부터 받을 수 있어요. '+
+          '<b style="color:#FFB84D">'+need+'점</b> 남았습니다.')+'</div>';
     el('season-list').innerHTML=board.map((r,i)=>{
       const g=i<3?' g'+(i+1):'';
       return '<li class="'+(r.me?'me':'')+'">'+
@@ -1194,9 +1245,10 @@
         '<span class="nm2">'+r.name+'</span>'+
         '<span class="pt2">'+r.pts+'<small style="font-size:10px"> 점</small></span></li>';
     }).join('');
-    const prize=prizeOf(rank);
+    const prize=prizeOf(rank, s.pts);
     el('season-foot').innerHTML = '시즌 종료까지 <b>'+(left>0?left+'일':'오늘까지')+'</b>'+
-      (prize?' · 지금 순위 유지 시 <b>'+prize.toLocaleString()+'P</b>':'');
+      (prize ? ' · 지금 순위 유지 시 <b>'+prize.toLocaleString()+'P</b>'
+             : (qualified ? '' : ' · 최소 점수 미달 시 <b>보상 없음</b>'));
   }
 
   function openSeason(){ pendingResult=null; el('rank-result').innerHTML=''; setSheetMode('season'); sheet.classList.add('show'); }
