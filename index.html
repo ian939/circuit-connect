@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>전류 잇기 · 충전 대기 미니게임</title>
+<title>충전기 정비사 · EV 충전기 수리 미니게임</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -215,6 +215,79 @@
   .result .rrow span{background:#00000033;border:1px solid #ffffff0f;border-radius:8px;padding:5px 9px;}
   .result .rrow b{color:var(--ink);font-weight:700;}
   .result .rrow .pay{color:#062322;background:var(--amber);border-color:transparent;font-weight:700;}
+  .result .rrow .sp{color:#062322;background:var(--cyan);border-color:transparent;font-weight:700;}
+
+  /* 시트 모드 전환 */
+  .rmode{display:flex;gap:5px;background:#00000038;border:1px solid var(--line);
+    border-radius:13px;padding:4px;margin-bottom:15px;}
+  .rmode button{flex:1;border:0;background:transparent;color:var(--muted);font-family:inherit;
+    font-size:13px;font-weight:600;padding:9px 4px;border-radius:10px;cursor:pointer;}
+  .rmode button.on{background:linear-gradient(180deg,#2E2D5C,#232246);color:var(--ink);box-shadow:0 2px 8px #0004;}
+
+  .season-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .info{flex:none;border:1px solid #41E6E040;background:#41E6E014;color:var(--cyan);
+    border-radius:10px;padding:7px 10px;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;}
+  .info:active{transform:scale(.96);}
+
+  .myseason{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:linear-gradient(180deg,#2B2A55,#1B1A38);border:1px solid var(--line);
+    border-radius:15px;padding:13px 15px;margin-bottom:12px;}
+  .myseason .l{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted);
+    letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .myseason .v{font-family:"IBM Plex Mono",monospace;font-size:24px;font-weight:700;
+    color:var(--cyan);line-height:1;}
+  .myseason .v small{font-size:12px;}
+  .myseason .r{text-align:right;}
+  .myseason .r .v{color:var(--amber);}
+  .season-foot{font-size:11px;color:var(--muted2);text-align:center;margin-top:10px;line-height:1.6;}
+  .season-foot b{color:var(--muted);}
+  .rank .pt2{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:700;color:var(--amber);}
+
+  /* 안내 페이지 */
+  #pane-guide{display:none;}
+  .gsec{margin-top:16px;}
+  .gh{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;margin-bottom:8px;}
+  .gh b{width:22px;height:22px;flex:none;border-radius:7px;display:grid;place-items:center;
+    background:#41E6E01f;border:1px solid #41E6E040;color:var(--cyan);
+    font-family:"IBM Plex Mono",monospace;font-size:11px;}
+  .gsec p{margin:0;font-size:12.5px;line-height:1.7;color:var(--muted);}
+  .gsec em{font-style:normal;color:var(--ink);font-weight:600;}
+  .gnote{margin-top:8px!important;font-size:11.5px!important;color:var(--muted2)!important;}
+  .gtable{width:100%;border-collapse:separate;border-spacing:0 5px;margin-top:10px;
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;}
+  .gtable th{text-align:left;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted2);font-weight:500;padding:0 11px 2px;}
+  .gtable th:last-child,.gtable td:last-child{text-align:right;}
+  .gtable td{background:#00000026;border-top:1px solid #ffffff0a;border-bottom:1px solid #ffffff0a;
+    padding:9px 11px;color:var(--muted);}
+  .gtable td:first-child{border-left:1px solid #ffffff0a;border-radius:10px 0 0 10px;}
+  .gtable td:last-child{border-right:1px solid #ffffff0a;border-radius:0 10px 10px 0;}
+  .gtable b{color:var(--cyan);}
+  .gtable.prize b{color:var(--amber);}
+  .gtable .p1 td{background:#FFD86B14;} .gtable .p1 td:first-child{color:#FFD86B;}
+  .gtable .p2 td{background:#CFD6E814;} .gtable .p2 td:first-child{color:#CFD6E8;}
+  .gtable .p3 td{background:#E0975C14;} .gtable .p3 td:first-child{color:#E0975C;}
+
+  /* 로비 시즌 카드 */
+  .season-card{width:100%;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:10px;
+    background:linear-gradient(135deg,#2E2B58,#1C1B3A);border:1px solid var(--line);
+    border-radius:16px;padding:13px 15px;margin-bottom:10px;color:var(--ink);
+    font-family:inherit;text-align:left;cursor:pointer;
+    box-shadow:inset 0 1px 0 #ffffff10,0 6px 18px #0004;transition:transform .08s,border-color .15s;}
+  .season-card:hover{border-color:var(--cyan-dim);}
+  .season-card:active{transform:scale(.985);}
+  .season-card .sck{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+    color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;}
+  .season-card .scv{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:700;color:var(--cyan);line-height:1;}
+  .season-card .scv2{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:700;color:var(--amber);line-height:1;}
+  .season-card small{font-size:11px;}
+  .season-card .sc-r{font-size:20px;opacity:.85;}
+
+  .prizebar{display:flex;align-items:center;gap:10px;background:#FFB84D14;border:1px solid #FFB84D3d;
+    border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:12.5px;line-height:1.5;}
+  .prizebar .x{margin-left:auto;flex:none;border:0;background:transparent;color:var(--muted);
+    font-size:17px;cursor:pointer;padding:0 2px;}
+  .prizebar b{color:var(--amber);font-family:"IBM Plex Mono",monospace;}
 
   .rswitch{display:flex;gap:5px;background:#00000033;border:1px solid var(--line);
     border-radius:12px;padding:4px;margin:0 0 13px;}
@@ -279,9 +352,24 @@
     font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:700;}
   .steps span{font-size:13.5px;line-height:1.55;color:var(--muted);padding-top:3px;}
   .steps em{font-style:normal;color:var(--ink);font-weight:600;}
-  .tut-note{font-size:11.5px;color:var(--muted2);text-align:center;margin-bottom:14px;}
+  .tut-note{font-size:11.5px;color:var(--muted2);text-align:center;margin-bottom:4px;}
   .tut-note b{color:var(--muted);}
-  .tut .btn{width:100%;}
+
+  /* 스토리 슬라이드 */
+  .slide{display:none;}
+  .slide.on{display:block;animation:fade .22s ease;}
+  .story{width:100%;height:auto;display:block;border-radius:14px;
+    border:1px solid var(--line);background:#0f0e22;margin-bottom:14px;
+    box-shadow:0 8px 24px #0006;image-rendering:auto;}
+  .story-txt{font-size:13.5px;line-height:1.65;color:var(--muted);margin:0;}
+  .story-txt b{color:var(--ink);font-weight:600;}
+  .tut-nav{margin-top:16px;}
+  .dots{display:flex;justify-content:center;gap:6px;margin-bottom:12px;}
+  .dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:all .2s;}
+  .dots i.on{width:18px;border-radius:3px;background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+  .tut-btns{display:flex;gap:9px;}
+  .tut-btns .btn{flex:1;}
+  .tut-btns .btn.hide{display:none;}
 
   /* 도움말 버튼 */
   .help{margin-left:auto;width:30px;height:30px;flex:none;border-radius:50%;
@@ -298,20 +386,20 @@
     <div class="plug" id="plug" title="길게 볼 것 없음">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="#41E6E0" stroke-width="1.7" stroke-linejoin="round"/></svg>
     </div>
-    <div><h1>전류 잇기</h1><div class="sub">Connect · Fill · Charge</div></div>
+    <div><h1>충전기 정비사</h1><div class="sub">EV Charger Repair</div></div>
     <button class="help" id="help" aria-label="게임 방법">?</button>
   </div>
 
   <div class="tabs" id="tabs">
-    <button class="tab active" id="tab-onboard">온보딩</button>
-    <button class="tab" id="tab-challenge">데일리 챌린지 <span class="lock" id="tab-lock">🔒</span></button>
+    <button class="tab active" id="tab-onboard">정비 교육</button>
+    <button class="tab" id="tab-challenge">오늘의 출동 <span class="lock" id="tab-lock">🔒</span></button>
   </div>
 
   <!-- ===================== 챌린지 로비 ===================== -->
   <div class="view" id="view-lobby">
     <div class="lobby-head">
       <span class="d" id="ch-date">—</span>
-      <span class="r">매일 자정 초기화</span>
+      <span class="r">오늘의 정비 요청</span>
     </div>
     <div id="ch-list"></div>
   </div>
@@ -330,7 +418,7 @@
     </div>
     <div class="bar"><i id="bar"></i></div>
     <div class="stats">
-      <div class="stat"><div class="k" id="k1">Stage</div><div class="v" id="stage">1</div></div>
+      <div class="stat"><div class="k" id="k1">교육 과정</div><div class="v" id="stage">1</div></div>
       <div class="stat"><div class="k">채움</div><div class="v" id="fill">0<small style="font-size:11px">%</small></div></div>
       <div class="stat pt"><div class="k" id="k3">적립 충전금</div><div class="v" id="points">0<small>원</small></div></div>
     </div>
@@ -339,7 +427,7 @@
   <div class="board-wrap">
     <div class="board" id="board">
       <div class="overlay" id="overlay">
-        <div class="big">회로 완성</div>
+        <div class="big">수리 완료</div>
         <div class="headline" id="o-head">STAGE 1 CLEAR</div>
         <div class="reward" id="o-reward">+60<span class="p">P</span></div>
         <div class="desc" id="o-desc">모든 회로가 연결됐어요. 충전 포인트가 적립됐습니다.</div>
@@ -368,6 +456,27 @@
 <!-- ===================== 첫판 가이드 ===================== -->
 <div class="tut" id="tut">
   <div class="tut-in">
+
+  <!-- 1컷 : 고장 접수 -->
+  <section class="slide" data-s="0">
+    <div class="tut-badge">EPISODE 01 · 고장 접수</div>
+    <h2>충전소가 멈췄습니다</h2>
+    <img class="story" src="story-1.webp" alt="고객이 충전소 고장을 접수하고, 상담원이 정비사 출동을 준비한다" width="960" height="524">
+    <p class="story-txt">“여보세요, 충전소가 고장 났어요.”<br>
+      접수된 고장 신고가 <b>정비반</b>으로 넘어왔습니다.</p>
+  </section>
+
+  <!-- 2컷 : 정비사 출동 -->
+  <section class="slide" data-s="1">
+    <div class="tut-badge">EPISODE 02 · 현장 출동</div>
+    <h2>당신이 출동할 차례입니다</h2>
+    <img class="story" src="story-2.webp" alt="공구함과 케이블을 든 정비사가 충전소로 향한다" width="960" height="524">
+    <p class="story-txt">공구함을 챙겨 현장에 도착했습니다.<br>
+      끊어진 <b>배선을 다시 이어</b> 충전기를 살려주세요.</p>
+  </section>
+
+  <!-- 3컷 : 조작법 -->
+  <section class="slide" data-s="2">
     <div class="tut-badge">HOW TO PLA<span class="y" id="skip-y">Y</span></div>
     <h2>같은 색 단자를 이어서<br>전류를 흐르게 하세요</h2>
 
@@ -380,13 +489,21 @@
     </div>
 
     <ol class="steps">
-      <li><b>1</b><span>같은 색 <em>동그라미 두 개</em>를 드래그해서 잇습니다</span></li>
-      <li><b>2</b><span>선은 <em>서로 겹칠 수 없어요</em>. 다른 선 위를 지나가면 그 선이 끊깁니다</span></li>
-      <li><b>3</b><span><em>빈칸을 하나도 남기지 않고</em> 모두 채워야 완성됩니다</span></li>
+      <li><b>1</b><span>같은 색 <em>단자 두 개</em>를 드래그해서 배선을 잇습니다</span></li>
+      <li><b>2</b><span>배선은 <em>서로 겹칠 수 없어요</em>. 다른 선 위를 지나가면 그 선이 끊깁니다</span></li>
+      <li><b>3</b><span><em>빈칸을 하나도 남기지 않고</em> 모두 채워야 수리 완료입니다</span></li>
     </ol>
 
-    <div class="tut-note">막히면 <b>지우기</b>로 언제든 다시 시작할 수 있어요</div>
-    <button class="btn primary" id="tut-go">시작하기</button>
+    <div class="tut-note">막히면 <b>지우기</b>로 언제든 다시 배선할 수 있어요</div>
+  </section>
+
+    <div class="tut-nav">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="tut-btns">
+        <button class="btn" id="tut-prev">이전</button>
+        <button class="btn primary" id="tut-go">다음</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -395,10 +512,84 @@
   <div class="sheet-in">
     <div class="grab"></div>
     <div id="rank-result"></div>
-    <h3 id="rank-title">랭킹</h3>
-    <div class="sub2" id="rank-sub">FASTEST TIME</div>
-    <div class="rswitch" id="rank-switch"></div>
-    <ol class="rank" id="rank-list"></ol>
+
+    <div class="rmode" id="rank-mode">
+      <button data-m="today" class="on">오늘 기록</button>
+      <button data-m="season">시즌 랭킹</button>
+    </div>
+
+    <!-- 오늘 기록 -->
+    <div id="pane-today">
+      <h3 id="rank-title">랭킹</h3>
+      <div class="sub2" id="rank-sub">FASTEST TIME</div>
+      <div class="rswitch" id="rank-switch"></div>
+      <ol class="rank" id="rank-list"></ol>
+    </div>
+
+    <!-- 시즌 랭킹 -->
+    <div id="pane-season">
+      <div class="season-head">
+        <div>
+          <h3 id="season-title">시즌</h3>
+          <div class="sub2" id="season-sub">SEASON RANKING</div>
+        </div>
+        <button class="info" id="season-info">ⓘ 랭킹 안내</button>
+      </div>
+      <div class="myseason" id="myseason"></div>
+      <ol class="rank" id="season-list"></ol>
+      <div class="season-foot" id="season-foot"></div>
+    </div>
+
+    <!-- 시즌 랭킹 안내 -->
+    <div id="pane-guide">
+      <h3>시즌 랭킹 안내</h3>
+      <div class="sub2">HOW SEASON RANKING WORKS</div>
+
+      <div class="gsec">
+        <div class="gh"><b>1</b> 시즌이란?</div>
+        <p>시즌은 <em>매달 1일에 시작해 말일에 끝납니다.</em> 시즌이 끝나면 순위에 따라
+          충전 포인트를 지급하고, 점수는 0점으로 초기화된 채 새 시즌이 시작됩니다.</p>
+      </div>
+
+      <div class="gsec">
+        <div class="gh"><b>2</b> 점수 쌓는 법</div>
+        <p>매일 배정되는 <em>정비 요청 3건</em>을 수리하면, 그날 그 충전기의
+          수리 시간 순위에 따라 시즌 점수가 쌓입니다. 하루 최대 <em>15점</em>.</p>
+        <table class="gtable">
+          <tr><th>그날 순위</th><th>획득 점수</th></tr>
+          <tr><td>1위</td><td><b>5점</b></td></tr>
+          <tr><td>2위</td><td><b>4점</b></td></tr>
+          <tr><td>3위</td><td><b>3점</b></td></tr>
+          <tr><td>4~10위</td><td><b>2점</b></td></tr>
+          <tr><td>11위 이하</td><td><b>1점</b></td></tr>
+        </table>
+        <p class="gnote">수리를 완료하지 못하면 점수가 없습니다. 순위는 <em>가장 빨리 고친 순서</em>입니다.</p>
+      </div>
+
+      <div class="gsec">
+        <div class="gh"><b>3</b> 시즌 보상</div>
+        <p>시즌 종료 시 <em>최종 누적 점수</em> 순위로 충전 포인트를 지급합니다.
+          보상은 다음 시즌 시작과 함께 자동 적립됩니다.</p>
+        <table class="gtable prize">
+          <tr><th>최종 순위</th><th>보상</th></tr>
+          <tr class="p1"><td>🥇 1위</td><td><b>5,000P</b></td></tr>
+          <tr class="p2"><td>🥈 2위</td><td><b>3,000P</b></td></tr>
+          <tr class="p3"><td>🥉 3위</td><td><b>2,000P</b></td></tr>
+          <tr><td>4~10위</td><td><b>1,000P</b></td></tr>
+          <tr><td>11~100위</td><td><b>500P</b></td></tr>
+        </table>
+        <p class="gnote">1P = 1원으로 충전 시 사용할 수 있습니다.</p>
+      </div>
+
+      <div class="gsec">
+        <div class="gh"><b>4</b> 알아두기</div>
+        <p>· 동점일 경우 <em>먼저 도달한 정비사</em>가 상위입니다.<br>
+           · 정비 요청은 <em>매일 자정에 3건</em>이 새로 배정됩니다.<br>
+           · 같은 날 모든 정비사에게 <em>동일한 고장</em>이 배정되므로 기록 비교가 공정합니다.<br>
+           · 한 번 수리를 완료한 충전기는 그날 다시 출동할 수 없습니다.</p>
+      </div>
+    </div>
+
     <button class="btn" id="sheet-close">닫기</button>
   </div>
 </div>
@@ -427,9 +618,9 @@
   const ONBOARD_LEN=ONBOARD_STEPS.length;
 
   const CHALLENGES=[                          // 랭킹전 : 8×8 / 9×9 / 10×10
-    { name:'워밍업',   size: 8, colors:7, base:170000 },
-    { name:'러시아워', size: 9, colors:8, base:255000 },
-    { name:'과부하',   size:10, colors:8, base:360000 },
+    { name:'100kW 충전기', kw:100, tag:'완속 · 표준형', size: 8, colors:7, base:170000 },
+    { name:'200kW 충전기', kw:200, tag:'급속 · 고전력', size: 9, colors:8, base:255000 },
+    { name:'350kW 충전기', kw:350, tag:'초급속 · 최고난도', size:10, colors:8, base:360000 },
   ];
   const DEV=true;                             // ⚠ 테스트용 숨은 단축키. 실서비스 배포 전 false
   const PAY=10;                               // 1판 = 10원 (충전 포인트)
@@ -468,9 +659,16 @@
   try{ const raw=localStorage.getItem(KEY); if(raw) store=Object.assign(store, JSON.parse(raw)||{}); }catch(e){}
   function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
 
-  function todayKey(){
-    const d=new Date();
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const keyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  function todayKey(){ return keyOf(new Date()); }
+  function seasonKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+  function parseKey(k){ const a=k.split('-').map(Number); return new Date(a[0],a[1]-1,a[2]||1); }
+  function seasonLastDay(sk){ const a=sk.split('-').map(Number); return keyOf(new Date(a[0],a[1],0)); }
+  function seasonLabel(sk){ const a=sk.split('-').map(Number); return a[0]+'년 '+a[1]+'월'; }
+  function dateKeys(fromK, toK){                 // 시즌 최대 31일 + 여유
+    const out=[]; let d=parseKey(fromK); const end=parseKey(toK);
+    for(let i=0;i<40 && d<=end;i++){ out.push(keyOf(d)); d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1); }
+    return out;
   }
   function todayRec(){
     const t=todayKey();
@@ -490,9 +688,9 @@
     return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+'.'+(t%10);
   }
 
-  /* ---------- 랭킹 : 봇 기록도 날짜 시드라 새로고침해도 그대로 ---------- */
-  function botTimes(ci){
-    const key=todayKey();
+  /* ---------- 일일 랭킹 : 봇 기록도 날짜 시드라 새로고침해도 그대로 ---------- */
+  function botTimes(ci, dk){
+    const key=dk||todayKey();
     return NAMES.filter(n=>n!==ME).map(n=>{
       const r=mulberry32(hashStr(key+'|'+ci+'|'+n));
       r(); r();
@@ -511,6 +709,53 @@
     return list;
   }
   function myRank(ci){ return leaderboard(ci).findIndex(x=>x.me)+1; }
+
+  /* ================= 시즌 랭킹 =================
+     · 매달 1일 시작 ~ 말일 종료
+     · 그날 순위에 따라 시즌 점수 누적 (1위 5 / 2위 4 / 3위 3 / 4~10위 2 / 그 외 1)
+     · 시즌 종료 시 최종 순위로 충전 포인트 지급                        */
+  const SEASON_PTS = r => r===1?5 : r===2?4 : r===3?3 : r<=10?2 : 1;
+  const SEASON_PRIZE = [ {to:1,p:5000}, {to:2,p:3000}, {to:3,p:2000}, {to:10,p:1000}, {to:100,p:500} ];
+  function prizeOf(rank){ for(const t of SEASON_PRIZE) if(rank<=t.to) return t.p; return 0; }
+
+  // 봇들의 시즌 누적 점수. 날짜 시드라 언제 계산해도 같은 값이 나온다.
+  function botSeasonPts(fromK, toK){
+    const pts={}; NAMES.filter(n=>n!==ME).forEach(n=>pts[n]=0);
+    const tk=todayKey(), rec=todayRec();
+    for(const dk of dateKeys(fromK,toK)){
+      for(let ci=0; ci<CHALLENGES.length; ci++){
+        const list=botTimes(ci,dk);
+        // 오늘 내가 완주한 판은 내 기록도 끼워넣어 봇 순위를 밀어낸다
+        if(dk===tk && rec[ci] && rec[ci].ms!=null) list.push({name:ME, ms:rec[ci].ms, me:true});
+        list.sort((a,b)=>a.ms-b.ms);
+        list.forEach((r,i)=>{ if(!r.me) pts[r.name]+=SEASON_PTS(i+1); });
+      }
+    }
+    return pts;
+  }
+  function seasonBoard(season){
+    const s=season||store.season;
+    const until = (s.key===seasonKey()) ? todayKey() : seasonLastDay(s.key);
+    const bp=botSeasonPts(s.since, until);
+    const list=NAMES.filter(n=>n!==ME).map(n=>({ name:n, pts:bp[n] }));
+    list.push({ name:ME, pts:s.pts, me:true });
+    list.sort((a,b)=> b.pts-a.pts || a.name.localeCompare(b.name));
+    return list;
+  }
+  function mySeasonRank(season){ return seasonBoard(season).findIndex(x=>x.me)+1; }
+
+  /* 시즌 경계 처리 : 달이 바뀌었으면 이전 시즌을 정산하고 새 시즌 시작 */
+  function ensureSeason(){
+    const sk=seasonKey();
+    if(!store.season || !store.season.key){ store.season={ key:sk, pts:0, since:todayKey() }; persist(); return; }
+    if(store.season.key===sk) return;
+    const prev=store.season;
+    const rank=mySeasonRank(prev), prize=prizeOf(rank);
+    if(prize){ store.won+=prize; awardPoints(prize,'season-'+prev.key+'-rank'+rank); }
+    store.lastSeason={ key:prev.key, rank:rank, pts:prev.pts, prize:prize, seen:false };
+    store.season={ key:sk, pts:0, since:todayKey() };
+    persist();
+  }
 
   /* ---------- 레벨 생성기 : 항상 정답이 존재 (해밀턴 경로를 잘라 색 배정) ---------- */
   function neighbors(cell){
@@ -625,7 +870,7 @@
   const el=id=>document.getElementById(id);
   function setHint(){
     el('hint').innerHTML = inPlay
-      ? '나가도 시간은 계속 흐릅니다 · 완주하면 +'+PAY+'원, 재도전 없음'
+      ? '현장을 떠나도 시간은 흐릅니다 · 수리 완료 시 +'+PAY+'원, 재출동 없음'
       : stage===1
         ? '같은 색 <b style="color:#41E6E0">동그라미 두 개</b>를 손가락으로 이어보세요'
         : '같은 색 단자를 드래그해서 잇기 · 빈칸을 모두 채우면 완성';
@@ -641,10 +886,10 @@
 
     const s1=el('stage'), s3=el('points');
     if(inPlay){                                        // 챌린지 진행 중
-      el('k1').textContent='경과 시간';  s1.className='v sm'; s1.textContent=fmt(elapsed());
+      el('k1').textContent='정비 시간';  s1.className='v sm'; s1.textContent=fmt(elapsed());
       el('k3').textContent='내 최고';    s3.className='v sm'; s3.textContent=fmt(myBest(chIndex));
     } else {                                           // 온보딩
-      el('k1').textContent='Stage';
+      el('k1').textContent='교육 과정';
       s1.className = stage<=ONBOARD_LEN ? 'v sm' : 'v';
       s1.textContent = stage<=ONBOARD_LEN ? stage+' / '+ONBOARD_LEN : String(stage);
       el('k3').textContent='적립 충전금'; s3.className='v';
@@ -790,7 +1035,7 @@
       CHALLENGES.forEach((c,i)=>{
         const r=rec[i]; if(!r || r.ms!=null) return;
         const n=el('rc'+i);
-        if(n) n.innerHTML='<u>진행 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 풀기';
+        if(n) n.innerHTML='<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 하기';
       });
     }, 200);
   }
@@ -806,17 +1051,27 @@
       list.innerHTML=
         '<div class="locked">'+
           '<div class="ico">🔒</div>'+
-          '<h3>온보딩 '+ONBOARD_LEN+'단계를 먼저 통과하세요</h3>'+
-          '<p>온보딩을 끝내면 매일 3판이 열립니다.<br>1판당 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.</p>'+
+          '<h3>정비 교육 '+ONBOARD_LEN+'과정을 먼저 이수하세요</h3>'+
+          '<p>교육을 이수하면 매일 3건의 정비 요청이 배정됩니다.<br>1건 수리할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.</p>'+
           '<div class="lbar"><i style="width:'+(cur/ONBOARD_LEN*100)+'%"></i></div>'+
-          '<div class="lnum">'+cur+' / '+ONBOARD_LEN+' 단계</div>'+
+          '<div class="lnum">'+cur+' / '+ONBOARD_LEN+' 과정</div>'+
         '</div>';
       return;
     }
 
     const rec=todayRec(), nDone=doneCount(), allDone=nDone===CHALLENGES.length;
 
-    let html=
+    let html='';
+
+    // 지난 시즌 보상 안내 (한 번만)
+    const ls=store.lastSeason;
+    if(ls && !ls.seen){
+      html+='<div class="prizebar" id="prizebar">🏆 <span>'+seasonLabel(ls.key)+' 시즌 <b>'+ls.rank+'위</b>'+
+        (ls.prize? ' · 보상 <b>'+ls.prize.toLocaleString()+'P</b> 적립 완료' : ' · 보상 없음')+
+        '</span><button class="x" id="prize-x">✕</button></div>';
+    }
+
+    html+=
       '<div class="wallet">'+
         '<div><span class="wk">오늘 적립</span>'+
           '<span class="wv">'+wonToday()+'<small>원</small>'+
@@ -824,9 +1079,16 @@
         '<div class="wr"><span class="wk">누적</span>'+
           '<span class="wv2">'+store.won.toLocaleString()+'<small>원</small></span></div>'+
       '</div>'+
+      '<button class="season-card" id="season-card">'+
+        '<span><span class="sck">'+seasonLabel(store.season.key)+' 시즌</span>'+
+          '<span class="scv">'+mySeasonRank()+'<small>위</small></span></span>'+
+        '<span><span class="sck">누적 점수</span>'+
+          '<span class="scv2">'+store.season.pts+'<small>점</small></span></span>'+
+        '<span class="sc-r">🏆</span>'+
+      '</button>'+
       '<div class="quota">'+
         CHALLENGES.map((c,i)=>'<i class="'+((rec[i]&&rec[i].ms!=null)?'on':'')+'"></i>').join('')+
-        '<span>오늘 '+nDone+' / '+CHALLENGES.length+'판 완료</span>'+
+        '<span>오늘 '+nDone+' / '+CHALLENGES.length+'건 수리 완료</span>'+
       '</div>';
 
     html+=CHALLENGES.map((c,i)=>{
@@ -834,27 +1096,30 @@
       const done   = !!(r && r.ms!=null);
       const inProg = !!(r && r.ms==null);
       const info = done   ? '내 기록 <b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i> · <s>+'+PAY+'원 적립됨</s>'
-                 : inProg ? '<u>진행 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 풀기'
-                 : '미도전 · 열면 바로 시간 카운트 · +'+PAY+'원';
+                 : inProg ? '<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 하기'
+                 : '미출동 · 도착하면 바로 시간 카운트 · +'+PAY+'원';
       return '<button class="ch-card'+(done?' cleared':'')+(inProg?' prog':'')+'" data-i="'+i+'">'+
         '<span class="no">'+(done?'✓':(i+1))+'</span>'+
         '<span><span class="nm">'+c.name+'</span>'+
-          '<span class="mt">'+c.size+'×'+c.size+' · '+c.colors+'색</span>'+
+          '<span class="mt">'+c.tag+' · '+c.size+'×'+c.size+'</span>'+
           '<span class="rc" id="rc'+i+'">'+info+'</span></span>'+
         '<span class="go">'+(done?'🏆':'▶')+'</span></button>';
     }).join('');
 
-    if(allDone) html+='<div class="alldone">오늘 '+CHALLENGES.length+'판을 모두 완료했어요 · '+
-      '<b>'+wonToday()+'원</b> 적립<br><span>내일 자정에 새 챌린지 3판이 열립니다</span></div>';
+    if(allDone) html+='<div class="alldone">오늘 '+CHALLENGES.length+'건을 모두 수리했어요 · '+
+      '<b>'+wonToday()+'원</b> 적립<br><span>내일 자정에 새 정비 요청 3건이 배정됩니다</span></div>';
 
     html+='<button class="btn" id="see-rank" style="width:100%;margin-top:4px">🏆 오늘의 랭킹 보기</button>';
     list.innerHTML=html;
 
     list.querySelectorAll('.ch-card').forEach(b=>{
       const i=+b.dataset.i, r=rec[i];
-      b.onclick = (r && r.ms!=null) ? (()=>openRank(i)) : (()=>openChallenge(i));   // 완주 후엔 랭킹만
+      b.onclick = (r && r.ms!=null) ? (()=>openRank(i)) : (()=>openChallenge(i));   // 수리 완료 후엔 랭킹만
     });
     el('see-rank').onclick=()=>openRank(0);
+    el('season-card').onclick=openSeason;
+    const px=el('prize-x');
+    if(px) px.onclick=e=>{ e.stopPropagation(); store.lastSeason.seen=true; persist(); renderLobby(); };
   }
 
   /* ---------- 챌린지 입장 (신규 / 이어서) ---------- */
@@ -869,7 +1134,7 @@
     persist();
 
     el('playbar').classList.add('on');
-    el('play-title').textContent='Challenge '+(i+1)+' · '+c.name;
+    el('play-title').textContent='정비 요청 '+(i+1)+' · '+c.name;
     setHint();
     el('controls').classList.add('solo');                        // 챌린지엔 '새 판' 없음
     showView('game'); renderTabs();
@@ -897,18 +1162,58 @@
 
   /* ---------- 랭킹 시트 ---------- */
   const sheet=el('sheet');
+  let sheetMode='today', pendingResult=null;
+
+  function setSheetMode(m){
+    sheetMode=m;
+    el('pane-today' ).style.display = m==='today' ?'block':'none';
+    el('pane-season').style.display = m==='season'?'block':'none';
+    el('pane-guide' ).style.display = m==='guide' ?'block':'none';
+    el('rank-mode'  ).style.display = m==='guide' ?'none':'flex';
+    el('rank-result').style.display = m==='guide' ?'none':'block';
+    [...el('rank-mode').children].forEach(b=>b.classList.toggle('on', b.dataset.m===m));
+    if(m==='season') renderSeason();
+    const b=el('sheet-close');
+    if(m==='guide'){ b.textContent='← 시즌 랭킹'; b.classList.remove('primary'); }
+    else if(pendingResult){ b.textContent='출동 목록으로'; b.classList.add('primary'); }
+    else { b.textContent='닫기'; b.classList.remove('primary'); }
+  }
+
+  function renderSeason(){
+    const s=store.season, board=seasonBoard(), rank=board.findIndex(x=>x.me)+1;
+    const endK=seasonLastDay(s.key), left=dateKeys(todayKey(),endK).length-1;
+    el('season-title').textContent=seasonLabel(s.key)+' 시즌';
+    el('season-sub').textContent='SEASON RANKING · '+(left>0?'D-'+left:'FINAL DAY');
+    el('myseason').innerHTML=
+      '<div><span class="l">내 순위</span><span class="v">'+rank+'<small>위</small></span></div>'+
+      '<div class="r"><span class="l">누적 점수</span><span class="v">'+s.pts+'<small>점</small></span></div>';
+    el('season-list').innerHTML=board.map((r,i)=>{
+      const g=i<3?' g'+(i+1):'';
+      return '<li class="'+(r.me?'me':'')+'">'+
+        '<span class="p'+g+'">'+(i+1)+'</span>'+
+        '<span class="nm2">'+r.name+'</span>'+
+        '<span class="pt2">'+r.pts+'<small style="font-size:10px"> 점</small></span></li>';
+    }).join('');
+    const prize=prizeOf(rank);
+    el('season-foot').innerHTML = '시즌 종료까지 <b>'+(left>0?left+'일':'오늘까지')+'</b>'+
+      (prize?' · 지금 순위 유지 시 <b>'+prize.toLocaleString()+'P</b>':'');
+  }
+
+  function openSeason(){ pendingResult=null; el('rank-result').innerHTML=''; setSheetMode('season'); sheet.classList.add('show'); }
+
   function openRank(ci, result){
-    el('rank-title').textContent='Challenge '+(ci+1)+' · '+CHALLENGES[ci].name;
+    el('rank-title').textContent=CHALLENGES[ci].name+' 수리 랭킹';
     el('rank-sub').textContent=todayKey()+' · FASTEST TIME';
 
     const rk=myRank(ci), left=CHALLENGES.length-doneCount();
     el('rank-result').innerHTML = !result ? '' :
       '<div class="result">'+
-        '<div class="rbig">회로 완성</div>'+
+        '<div class="rbig">수리 완료</div>'+
         '<div class="rtime">'+fmt(result.ms)+'</div>'+
         '<div class="rrow"><span>오늘 <b>'+rk+'위</b></span>'+
           (result.paid?'<span class="pay">+'+PAY+'원 적립</span>':'')+
-          '<span>'+(left?'남은 판 '+left:'3판 완료')+'</span></div>'+
+          (result.sp?'<span class="sp">시즌 +'+result.sp+'점</span>':'')+
+          '<span>'+(left?'남은 요청 '+left:'오늘 완료')+'</span></div>'+
       '</div>';
 
     el('rank-list').innerHTML=leaderboard(ci).map((r,i)=>{
@@ -923,15 +1228,17 @@
     sw.innerHTML=CHALLENGES.map((c,i)=>'<button class="'+(i===ci?'on':'')+'" data-i="'+i+'">'+(i+1)+'. '+c.name+'</button>').join('');
     sw.querySelectorAll('button').forEach(b=>b.onclick=()=>openRank(+b.dataset.i));
 
-    el('sheet-close').textContent = result ? '챌린지 홈으로' : '닫기';
-    el('sheet-close').classList.toggle('primary', !!result);
+    pendingResult=result||null;
+    setSheetMode('today');
     sheet.classList.add('show');
     const me=el('rank-list').querySelector('.me');
     if(me) setTimeout(()=>me.scrollIntoView({block:'nearest'}), 60);
   }
-  function closeSheet(){ sheet.classList.remove('show'); }
+  function closeSheet(){ sheet.classList.remove('show'); pendingResult=null; }
   sheet.onclick=e=>{ if(e.target===sheet) closeSheet(); };
-  el('sheet-close').onclick=closeSheet;
+  el('sheet-close').onclick=()=>{ if(sheetMode==='guide') setSheetMode('season'); else closeSheet(); };
+  el('season-info').onclick=()=>setSheetMode('guide');
+  [...el('rank-mode').children].forEach(b=>b.onclick=()=>setSheetMode(b.dataset.m));
 
   /* ================= 승리 처리 ================= */
   function checkWin(){
@@ -965,15 +1272,15 @@
     const rw = paid ? '+'+PAY+'<span class="p">원</span>'
                     : '<span style="color:#8785BE">연습</span>';
     if(justUnlocked){
-      setOverlay({ big:'온보딩 완료', head:'데일리 챌린지 해금!', reward:rw,
-        desc:'이제부터 <b>매일 3판</b>의 랭킹전만 열립니다.<br>완주할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
+      setOverlay({ big:'교육 이수', head:'정비사 자격 획득!', reward:rw,
+        desc:'이제부터 <b>매일 3건</b>의 정비 요청이 배정됩니다.<br>수리할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
         left:null,
-        right:{t:'랭킹전 시작', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
+        right:{t:'현장 출동', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
     } else {
-      setOverlay({ big:'회로 완성', head:'STAGE '+stage+' CLEAR', reward:rw,
+      setOverlay({ big:'수리 완료', head:'교육 '+stage+'과정 수료', reward:rw,
         desc: paid ? '충전 포인트 '+PAY+'원이 적립됐습니다.<br>누적 <b>'+store.won.toLocaleString()+'원</b>'
-                   : '이미 적립한 단계라 이번엔 지급되지 않아요.',
-        left:{t:'처음부터', fn:resetOnboard}, right:{t:'다음 스테이지', fn:nextStage} });
+                   : '이미 이수한 과정이라 이번엔 지급되지 않아요.',
+        left:{t:'처음부터', fn:resetOnboard}, right:{t:'다음 과정', fn:nextStage} });
     }
   }
 
@@ -981,11 +1288,16 @@
     stopTimer();
     const ms=chFinal, i=chIndex, r=todayRec()[i];
     r.ms=ms; r.paths=null;                       // 완주 확정 → 재도전 불가
-    let paid=false;
-    if(!r.paid){ r.paid=true; paid=true; store.won+=PAY; awardPoints(PAY,'challenge-'+(i+1)); }
+    let paid=false, sp=0;
+    if(!r.paid){
+      r.paid=true; paid=true;
+      store.won+=PAY; awardPoints(PAY,'repair-'+(i+1));
+      sp=SEASON_PTS(myRank(i));                  // 그날 순위 → 시즌 점수 누적
+      r.sp=sp; store.season.pts+=sp;
+    } else sp=r.sp||0;
     persist(); updateHud();
-    // 완주하면 보드에 머물지 않고 곧장 랭킹으로. 닫으면 챌린지 홈.
-    setTimeout(()=>{ goLobby(); openRank(i,{ ms:ms, paid:paid }); }, 700);
+    // 수리를 마치면 보드에 머물지 않고 곧장 랭킹으로. 닫으면 출동 목록.
+    setTimeout(()=>{ goLobby(); openRank(i,{ ms:ms, paid:paid, sp:sp }); }, 700);
   }
 
   function nextStage(){ overlay.classList.remove('show'); stage++; onboardSnap=null;
@@ -1003,7 +1315,7 @@
      클라이언트 localStorage 는 조작 가능하므로 지급 근거로 쓰면 안 됨.        */
   function awardPoints(won, src){
     // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', won:won, src:src, date:todayKey()}, '*');
-    console.log('[전류 잇기] 충전 포인트 적립 요청:', won+'원', '('+src+')');
+    console.log('[충전기 정비사] 충전 포인트 적립 요청:', won+'원', '('+src+')');
   }
 
   /* ================= 버튼 배선 ================= */
@@ -1014,12 +1326,23 @@
   el('tab-challenge').onclick=goLobby;
 
   /* ---------- 첫판 가이드 ---------- */
-  const tut=el('tut');
-  function openTut(){ tut.classList.add('show'); }
+  const tut=el('tut'), slides=[...tut.querySelectorAll('.slide')], dots=[...tut.querySelectorAll('.dots i')];
+  const LAST=slides.length-1;
+  let slide=0;
+  function showSlide(n){
+    slide=Math.max(0,Math.min(LAST,n));
+    slides.forEach((s,i)=>s.classList.toggle('on', i===slide));
+    dots.forEach((d,i)=>d.classList.toggle('on', i===slide));
+    el('tut-prev').classList.toggle('hide', slide===0);
+    el('tut-go').textContent = slide===LAST ? '정비 시작' : '다음';
+    tut.querySelector('.tut-in').scrollTop=0;
+  }
+  function openTut(n){ showSlide(n==null?0:n); tut.classList.add('show'); }
   function closeTut(){ tut.classList.remove('show'); store.seenTut=true; persist(); }
-  el('tut-go').onclick=closeTut;
-  el('help').onclick=openTut;
-  tut.onclick=e=>{ if(e.target===tut) closeTut(); };
+  el('tut-prev').onclick=()=>showSlide(slide-1);
+  el('tut-go').onclick=()=>{ if(slide<LAST) showSlide(slide+1); else closeTut(); };
+  el('help').onclick=()=>openTut(store.seenTut ? LAST : 0);   // 재열람은 조작법부터
+  tut.onclick=e=>{ if(e.target===tut && store.seenTut) closeTut(); };
 
   /* ===== 테스트용 숨은 단축키 (배포 전 DEV=false) =====
      · 번개 아이콘 탭      → 전체 초기화
@@ -1045,6 +1368,7 @@
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveProgress(); });
 
   /* ================= 초기화 ================= */
+  ensureSeason();                               // 달이 바뀌었으면 이전 시즌 정산
   if(store.unlocked){
     // 온보딩을 마친 사용자는 랭킹전 홈으로 바로 진입 (온보딩은 다시 안 보임)
     mode='challenge';
