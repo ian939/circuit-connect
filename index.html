@@ -299,7 +299,7 @@
     <button class="help" id="help" aria-label="게임 방법">?</button>
   </div>
 
-  <div class="tabs">
+  <div class="tabs" id="tabs">
     <button class="tab active" id="tab-onboard">온보딩</button>
     <button class="tab" id="tab-challenge">데일리 챌린지 <span class="lock" id="tab-lock">🔒</span></button>
   </div>
@@ -451,6 +451,14 @@
 
   /* ---------- 저장 ---------- */
   const KEY='circuit-connect.v2';
+
+  /* 테스트용 초기화 : 주소 끝에 ?reset 을 붙이면 저장된 진행도를 전부 지운다 */
+  if(/[?&#]reset\b/.test(location.search+location.hash)){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    location.replace(location.href.split(/[?#]/)[0]);
+    return;
+  }
+
   // paidStage: 여기까지의 온보딩 단계는 이미 적립됨 → '처음부터'로 재클리어해도 재지급 없음
   let store={ maxStage:1, won:0, paidStage:0, unlocked:false, daily:{} };
   try{ const raw=localStorage.getItem(KEY); if(raw) store=Object.assign(store, JSON.parse(raw)||{}); }catch(e){}
@@ -739,15 +747,12 @@
 
   /* ---------- 탭 ---------- */
   function renderTabs(){
+    // 온보딩을 끝내면 탭 자체가 사라지고 랭킹전만 남는다
+    el('tabs').style.display = store.unlocked ? 'none' : '';
+    if(store.unlocked) return;
     el('tab-onboard').classList.toggle('active', mode==='onboard');
     el('tab-challenge').classList.toggle('active', mode==='challenge');
-    const lock=el('tab-lock');
-    if(!store.unlocked){ lock.className='lock'; lock.textContent='🔒'; }
-    else {
-      const rec=todayRec(), left=CHALLENGES.filter((c,i)=>!rec[i]).length;
-      if(left){ lock.className='dot'; lock.textContent=''; }
-      else { lock.className='lock'; lock.textContent='✓'; }
-    }
+    const lock=el('tab-lock'); lock.className='lock'; lock.textContent='🔒';
   }
   function showView(v){
     el('view-lobby').classList.toggle('on', v==='lobby');
@@ -937,7 +942,8 @@
     el('o-reward').innerHTML=o.reward;
     el('o-desc').innerHTML=o.desc;
     const L=el('o-restart'), R=el('o-next');
-    L.textContent=o.left.t;  L.onclick=o.left.fn;
+    L.style.display = o.left ? '' : 'none';
+    if(o.left){ L.textContent=o.left.t; L.onclick=o.left.fn; }
     R.textContent=o.right.t; R.onclick=o.right.fn;
     setTimeout(()=>overlay.classList.add('show'), 420);
   }
@@ -956,9 +962,9 @@
                     : '<span style="color:#8785BE">연습</span>';
     if(justUnlocked){
       setOverlay({ big:'온보딩 완료', head:'데일리 챌린지 해금!', reward:rw,
-        desc:'이제 <b>매일 3판</b>이 열립니다.<br>완주할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
-        left:{t:'연습 계속', fn:nextStage},
-        right:{t:'챌린지 보기', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
+        desc:'이제부터 <b>매일 3판</b>의 랭킹전만 열립니다.<br>완주할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
+        left:null,
+        right:{t:'랭킹전 시작', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
     } else {
       setOverlay({ big:'회로 완성', head:'STAGE '+stage+' CLEAR', reward:rw,
         desc: paid ? '충전 포인트 '+PAY+'원이 적립됐습니다.<br>누적 <b>'+store.won.toLocaleString()+'원</b>'
@@ -1014,10 +1020,16 @@
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveProgress(); });
 
   /* ================= 초기화 ================= */
-  stage=Math.max(1, store.maxStage||1);
-  renderTabs();
-  const p0=params(stage); genPuzzle(p0.size,p0.colors); setHint();
-  if(!store.seenTut) openTut();               // 첫 판에는 가이드부터
+  if(store.unlocked){
+    // 온보딩을 마친 사용자는 랭킹전 홈으로 바로 진입 (온보딩은 다시 안 보임)
+    mode='challenge';
+    showView('lobby'); renderTabs(); renderLobby(); startLobbyTick();
+  } else {
+    stage=Math.max(1, Math.min(ONBOARD_LEN, store.maxStage||1));
+    renderTabs();
+    const p0=params(stage); genPuzzle(p0.size,p0.colors); setHint();
+    if(!store.seenTut) openTut();             // 첫 판에는 가이드부터
+  }
 })();
 </script>
 </body>
