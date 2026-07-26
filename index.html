@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>충전기 정비사 · EV 충전기 수리 미니게임</title>
+<title>끊어진 배선을 고쳐라! · EV 충전기 수리</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -425,7 +425,7 @@
     <div class="plug" id="plug" title="길게 볼 것 없음">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="#41E6E0" stroke-width="1.7" stroke-linejoin="round"/></svg>
     </div>
-    <div><h1>충전기 정비사</h1><div class="sub">EV Charger Repair</div></div>
+    <div><h1>끊어진 배선을 고쳐라!</h1><div class="sub">EV Charger Repair</div></div>
     <button class="help" id="help" aria-label="게임 방법">?</button>
   </div>
 
@@ -459,7 +459,7 @@
     <div class="stats">
       <div class="stat"><div class="k" id="k1">교육 과정</div><div class="v" id="stage">1</div></div>
       <div class="stat"><div class="k">채움</div><div class="v" id="fill">0<small style="font-size:11px">%</small></div></div>
-      <div class="stat pt"><div class="k" id="k3">적립 충전금</div><div class="v" id="points">0<small>원</small></div></div>
+      <div class="stat pt"><div class="k" id="k3">적립 충전금</div><div class="v" id="points">0<small>P</small></div></div>
     </div>
   </div>
 
@@ -610,8 +610,7 @@
 
       <div class="gsec">
         <div class="gh"><b>3</b> 시즌 보상</div>
-        <div class="warn">⚠ 시즌 보상은 <em>누적 100점 이상</em>을 확보해야 받을 수 있습니다.<br>
-          100점 미만이면 순위와 관계없이 보상이 지급되지 않습니다.</div>
+        <div class="warn">⚠ 시즌 보상은 <em>누적 50점 이상</em>이어야 받을 수 있습니다.<br>순위와 무관하게 미달 시 미지급.</div>
         <p>시즌 종료 시 <em>최종 누적 점수</em> 순위로 충전 포인트를 지급합니다.
           보상은 다음 시즌 시작과 함께 자동 적립됩니다.</p>
         <table class="gtable prize">
@@ -622,8 +621,7 @@
           <tr><td>4~10위</td><td><b>1,000P</b></td></tr>
           <tr><td>11~100위</td><td><b>500P</b></td></tr>
         </table>
-        <p class="gnote">1P = 1원으로 충전 시 사용할 수 있습니다.<br>
-          100점은 <em>하루 3건을 꾸준히 수리하면 약 10일</em>이면 도달합니다 (하루 최대 15점).</p>
+        <p class="gnote">P는 충전 시 현금처럼 쓸 수 있습니다.<br>50점은 <em>하루 3건이면 약 5일</em>이면 도달합니다 (하루 최대 15점).</p>
       </div>
 
       <div class="gsec">
@@ -670,10 +668,11 @@
     { name:'350kW 충전기', kw:350, tag:'초급속 · 최고난도', size:8, colors:7, holes:8, slack:2, base:215000 },
   ];
   const DEV=true;                             // ⚠ 테스트용 숨은 단축키. 실서비스 배포 전 false
-  const PAY=10;                               // 1판 = 10원 (충전 포인트)
+  const PAY=10;                               // 수리 완료 = 10P
+  const PART_PAY=5, PART_MIN=0.9;             // 90% 이상 채우면 부분 보상 5P (총액은 10P 상한)
   /* 적립 규칙
-     - 온보딩: 각 단계 최초 클리어 1회만 지급 (10단계 = 100원, 반복 파밍 불가)
-     - 챌린지: 하루 3판 × 10원 = 30원. 완주하면 그날은 재참여 불가        */
+     - 교육: 각 과정 최초 클리어 1회만 지급 (반복 파밍 불가)
+     - 출동: 하루 3건 × 10P = 30P. 90% 이상이면 5P 선지급, 완료 시 나머지 5P */
 
   /* ---------- 시드 난수 : 같은 날 = 같은 문제 = 공정한 랭킹 ---------- */
   function hashStr(s){
@@ -763,7 +762,7 @@
      · 시즌 종료 시 최종 순위로 충전 포인트 지급                        */
   const SEASON_PTS = r => r===1?5 : r===2?4 : r===3?3 : r<=10?2 : 1;
   const SEASON_PRIZE = [ {to:1,p:5000}, {to:2,p:3000}, {to:3,p:2000}, {to:10,p:1000}, {to:100,p:500} ];
-  const SEASON_MIN_PTS = 100;                  // 이 점수를 넘겨야 시즌 보상 대상
+  const SEASON_MIN_PTS = 50;                   // 이 점수를 넘겨야 시즌 보상 대상
   function prizeOf(rank, pts){
     if(pts!=null && pts<SEASON_MIN_PTS) return 0;   // 최소 점수 미달 → 순위와 무관하게 보상 없음
     for(const t of SEASON_PRIZE) if(rank<=t.to) return t.p;
@@ -1046,10 +1045,10 @@
 
   const el=id=>document.getElementById(id);
   function setHint(){
-    if(inPlay){ el('hint').innerHTML='현장을 떠나도 시간은 흐릅니다 · 수리 완료 시 +'+PAY+'원, 재출동 없음'; return; }
+    if(inPlay){ el('hint').innerHTML='나가도 시간은 흐름 · 완료 +'+PAY+'P · 재출동 없음'; return; }
     const p=params(stage);
     el('hint').innerHTML = (p && p.tip) ? p.tip
-      : '단자의 숫자만큼만 늘릴 수 있어요 · 빈칸을 모두 채우면 수리 완료';
+      : '단자 숫자만큼만 연장 가능 · 빈칸을 모두 채우면 완료';
   }
   function updateHud(){
     recomputeDone();
@@ -1069,7 +1068,7 @@
       s1.className = stage<=ONBOARD_LEN ? 'v sm' : 'v';
       s1.textContent = stage<=ONBOARD_LEN ? stage+' / '+ONBOARD_LEN : String(stage);
       el('k3').textContent='적립 충전금'; s3.className='v';
-      s3.innerHTML=store.won.toLocaleString()+'<small>원</small>';
+      s3.innerHTML=store.won.toLocaleString()+'<small>P</small>';
     }
   }
 
@@ -1220,7 +1219,7 @@
       CHALLENGES.forEach((c,i)=>{
         const r=rec[i]; if(!r || r.ms!=null) return;
         const n=el('rc'+i);
-        if(n) n.innerHTML='<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 하기';
+        if(n) n.innerHTML='<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서';
       });
     }, 200);
   }
@@ -1236,10 +1235,10 @@
       list.innerHTML=
         '<div class="locked">'+
           '<div class="ico">🔒</div>'+
-          '<h3>정비 교육 '+ONBOARD_LEN+'과정을 먼저 이수하세요</h3>'+
-          '<p>교육을 이수하면 매일 3건의 정비 요청이 배정됩니다.<br>1건 수리할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.</p>'+
+          '<h3>정비 교육 '+ONBOARD_LEN+'과정 먼저</h3>'+
+          '<p>이수하면 매일 3건이 배정돼요.<br>1건 수리에 <b style="color:#FFB84D">'+PAY+'P</b>.</p>'+
           '<div class="lbar"><i style="width:'+(cur/ONBOARD_LEN*100)+'%"></i></div>'+
-          '<div class="lnum">'+cur+' / '+ONBOARD_LEN+' 과정</div>'+
+          '<div class="lnum">'+cur+' / '+ONBOARD_LEN+'</div>'+
         '</div>';
       return;
     }
@@ -1254,19 +1253,19 @@
       const icon = ls.prize ? '🏆' : (ls.short ? '🔒' : '📋');
       html+='<div class="prizebar'+(ls.prize?'':' none')+'" id="prizebar">'+icon+' <span>'+
         seasonLabel(ls.key)+' 시즌 <b>'+ls.rank+'위</b> · '+ls.pts+'점'+
-        (ls.prize ? '<br>보상 <b>'+ls.prize.toLocaleString()+'P</b> 적립 완료'
-          : ls.short ? '<br>최소 '+SEASON_MIN_PTS+'점에 미달해 보상이 지급되지 않았어요'
-                     : '<br>보상 순위(100위) 밖이라 보상이 없어요')+
+        (ls.prize ? '<br>보상 <b>'+ls.prize.toLocaleString()+'P</b> 적립'
+          : ls.short ? '<br>최소 '+SEASON_MIN_PTS+'점 미달 · 보상 없음'
+                     : '<br>100위 밖 · 보상 없음')+
         '</span><button class="x" id="prize-x">✕</button></div>';
     }
 
     html+=
       '<div class="wallet">'+
         '<div><span class="wk">오늘 적립</span>'+
-          '<span class="wv">'+wonToday()+'<small>원</small>'+
-          '<span class="wmax"> / '+(CHALLENGES.length*PAY)+'원</span></span></div>'+
+          '<span class="wv">'+wonToday()+'<small>P</small>'+
+          '<span class="wmax"> / '+(CHALLENGES.length*PAY)+'P</span></span></div>'+
         '<div class="wr"><span class="wk">누적</span>'+
-          '<span class="wv2">'+store.won.toLocaleString()+'<small>원</small></span></div>'+
+          '<span class="wv2">'+store.won.toLocaleString()+'<small>P</small></span></div>'+
       '</div>'+
       '<button class="season-card" id="season-card">'+
         '<span><span class="sck">'+seasonLabel(store.season.key)+' 시즌</span>'+
@@ -1278,26 +1277,26 @@
       '</button>'+
       '<div class="quota">'+
         CHALLENGES.map((c,i)=>'<i class="'+((rec[i]&&rec[i].ms!=null)?'on':'')+'"></i>').join('')+
-        '<span>오늘 '+nDone+' / '+CHALLENGES.length+'건 수리 완료</span>'+
+        '<span>'+nDone+' / '+CHALLENGES.length+'건 완료</span>'+
       '</div>';
 
     html+=CHALLENGES.map((c,i)=>{
       const r=rec[i];
       const done   = !!(r && r.ms!=null);
       const inProg = !!(r && r.ms==null);
-      const info = done   ? '내 기록 <b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i> · <s>+'+PAY+'원 적립됨</s>'
-                 : inProg ? '<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서 하기'
-                 : '미출동 · 도착하면 바로 시간 카운트 · +'+PAY+'원';
+      const info = done   ? '<b>'+fmt(r.ms)+'</b> · <i>'+myRank(i)+'위</i> · <s>+'+(r.got||PAY)+'P</s>'
+                 : inProg ? '<u>수리 중</u> <b>'+fmt(Date.now()-r.start)+'</b> · 이어서'
+                 : '미출동 · 연결시 +'+PAY+'P';
       return '<button class="ch-card'+(done?' cleared':'')+(inProg?' prog':'')+'" data-i="'+i+'">'+
         '<span class="no">'+(done?'✓':(i+1))+'</span>'+
         '<span><span class="nm">'+c.name+'</span>'+
-          '<span class="mt">'+c.tag+' · '+c.size+'×'+c.size+' · 탄 자리 '+c.holes+'</span>'+
+          '<span class="mt">'+c.size+'×'+c.size+' · '+c.colors+'색 · 탄 자리 '+c.holes+'</span>'+
           '<span class="rc" id="rc'+i+'">'+info+'</span></span>'+
         '<span class="go">'+(done?'🏆':'▶')+'</span></button>';
     }).join('');
 
-    if(allDone) html+='<div class="alldone">오늘 '+CHALLENGES.length+'건을 모두 수리했어요 · '+
-      '<b>'+wonToday()+'원</b> 적립<br><span>내일 자정에 새 정비 요청 3건이 배정됩니다</span></div>';
+    if(allDone) html+='<div class="alldone">오늘 '+CHALLENGES.length+'건 완료 · '+
+      '<b>'+wonToday()+'P</b> 적립<br><span>내일 자정 새 요청 3건</span></div>';
 
     html+='<button class="btn" id="see-rank" style="width:100%;margin-top:4px">🏆 오늘의 랭킹 보기</button>';
     list.innerHTML=html;
@@ -1347,7 +1346,19 @@
     const r=todayRec()[chIndex];
     if(!r || r.ms!=null) return;
     r.paths=colorPaths.map(p=>Array.from(p));
+    checkPartial(r);
     persist();
+  }
+
+  /* 90% 이상 채우면 부분 보상 5P 선지급 (완료 시 나머지 5P → 총액은 10P 그대로) */
+  function checkPartial(r){
+    if(!r || r.ms!=null || r.part) return;
+    let f=0; for(let i=0;i<N;i++) if(cellColor[i]>=0) f++;
+    if(f/(fillTarget||N) < PART_MIN) return;
+    r.part=PART_PAY; store.won+=PART_PAY;
+    awardPoints(PART_PAY,'partial-'+(chIndex+1));
+    el('hint').innerHTML='부분 수리 <b>+'+PART_PAY+'P</b> 적립 · 마저 이으면 +'+(PAY-PART_PAY)+'P';
+    updateHud();
   }
 
   /* ---------- 랭킹 시트 ---------- */
@@ -1386,7 +1397,7 @@
         '<span><b>'+Math.min(s.pts,SEASON_MIN_PTS)+'</b> / '+SEASON_MIN_PTS+'점</span></div>'+
       '<div class="qbar"><i style="width:'+Math.min(100, s.pts/SEASON_MIN_PTS*100)+'%"></i></div>'+
       '<div class="qm">'+(qualified
-        ? '✓ 보상 자격을 확보했어요. 시즌 종료 시 순위대로 지급됩니다.'
+        ? '✓ 보상 자격 확보 · 시즌 종료 시 순위대로 지급'
         : '시즌 보상은 <b style="color:#FFB84D">'+SEASON_MIN_PTS+'점 이상</b>부터 받을 수 있어요. '+
           '<b style="color:#FFB84D">'+need+'점</b> 남았습니다.')+'</div>';
     el('season-list').innerHTML=board.map((r,i)=>{
@@ -1397,9 +1408,9 @@
         '<span class="pt2">'+r.pts+'<small style="font-size:10px"> 점</small></span></li>';
     }).join('');
     const prize=prizeOf(rank, s.pts);
-    el('season-foot').innerHTML = '시즌 종료까지 <b>'+(left>0?left+'일':'오늘까지')+'</b>'+
+    el('season-foot').innerHTML = '종료까지 <b>'+(left>0?left+'일':'오늘까지')+'</b>'+
       (prize ? ' · 지금 순위 유지 시 <b>'+prize.toLocaleString()+'P</b>'
-             : (qualified ? '' : ' · 최소 점수 미달 시 <b>보상 없음</b>'));
+             : (qualified ? '' : ' · 미달 시 <b>보상 없음</b>'));
   }
 
   function openSeason(){ pendingResult=null; el('rank-result').innerHTML=''; setSheetMode('season'); sheet.classList.add('show'); }
@@ -1414,9 +1425,9 @@
         '<div class="rbig">수리 완료</div>'+
         '<div class="rtime">'+fmt(result.ms)+'</div>'+
         '<div class="rrow"><span>오늘 <b>'+rk+'위</b></span>'+
-          (result.paid?'<span class="pay">+'+PAY+'원 적립</span>':'')+
+          (result.paid?'<span class="pay">+'+result.paid+'P</span>':'')+
           (result.sp?'<span class="sp">시즌 +'+result.sp+'점</span>':'')+
-          '<span>'+(left?'남은 요청 '+left:'오늘 완료')+'</span></div>'+
+          '<span>'+(left?'남은 '+left+'건':'오늘 완료')+'</span></div>'+
       '</div>';
 
     el('rank-list').innerHTML=leaderboard(ci).map((r,i)=>{
@@ -1473,17 +1484,17 @@
     if(justUnlocked) store.unlocked=true;
     persist(); if(paid) awardPoints(PAY,'onboarding-'+stage); updateHud(); renderTabs();
 
-    const rw = paid ? '+'+PAY+'<span class="p">원</span>'
+    const rw = paid ? '+'+PAY+'<span class="p">P</span>'
                     : '<span style="color:#8785BE">연습</span>';
     if(justUnlocked){
       setOverlay({ big:'교육 이수', head:'정비사 자격 획득!', reward:rw,
-        desc:'이제부터 <b>매일 3건</b>의 정비 요청이 배정됩니다.<br>수리할 때마다 <b style="color:#FFB84D">'+PAY+'원</b>씩 충전 포인트로 적립돼요.',
+        desc:'이제부터 <b>매일 3건</b>이 배정돼요.<br>1건 수리에 <b style="color:#FFB84D">'+PAY+'P</b>.',
         left:null,
         right:{t:'현장 출동', fn:()=>{ overlay.classList.remove('show'); goLobby(); }} });
     } else {
       setOverlay({ big:'수리 완료', head:'교육 '+stage+'과정 수료', reward:rw,
-        desc: paid ? '충전 포인트 '+PAY+'원이 적립됐습니다.<br>누적 <b>'+store.won.toLocaleString()+'원</b>'
-                   : '이미 이수한 과정이라 이번엔 지급되지 않아요.',
+        desc: paid ? '+'+PAY+'P 적립 · 누적 <b>'+store.won.toLocaleString()+'P</b>'
+                   : '이미 이수한 과정이에요.',
         left:{t:'처음부터', fn:resetOnboard}, right:{t:'다음 과정', fn:nextStage} });
     }
   }
@@ -1492,13 +1503,15 @@
     stopTimer();
     const ms=chFinal, i=chIndex, r=todayRec()[i];
     r.ms=ms; r.paths=null;                       // 완주 확정 → 재도전 불가
-    let paid=false, sp=0;
+    let paid=0, sp=0;
     if(!r.paid){
-      r.paid=true; paid=true;
-      store.won+=PAY; awardPoints(PAY,'repair-'+(i+1));
+      r.paid=true;
+      paid=PAY-(r.part||0);                      // 부분 보상 선지급분은 차감
+      r.got=PAY;
+      store.won+=paid; if(paid) awardPoints(paid,'repair-'+(i+1));
       sp=SEASON_PTS(myRank(i));                  // 그날 순위 → 시즌 점수 누적
       r.sp=sp; store.season.pts+=sp;
-    } else sp=r.sp||0;
+    } else { sp=r.sp||0; paid=0; }
     persist(); updateHud();
     // 수리를 마치면 보드에 머물지 않고 곧장 랭킹으로. 닫으면 출동 목록.
     setTimeout(()=>{ goLobby(); openRank(i,{ ms:ms, paid:paid, sp:sp }); }, 700);
@@ -1521,7 +1534,7 @@
      클라이언트 localStorage 는 조작 가능하므로 지급 근거로 쓰면 안 됨.        */
   function awardPoints(won, src){
     // 예: window.parent.postMessage({type:'CHARGE_POINT_EARNED', won:won, src:src, date:todayKey()}, '*');
-    console.log('[충전기 정비사] 충전 포인트 적립 요청:', won+'원', '('+src+')');
+    console.log('[배선 수리] 포인트 적립 요청:', won+'P', '('+src+')');
   }
 
   /* ================= 버튼 배선 ================= */
