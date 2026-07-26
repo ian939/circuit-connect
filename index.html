@@ -248,6 +248,9 @@
     animation:up .3s cubic-bezier(.2,.8,.2,1);}
   .tut-badge{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--cyan);
     letter-spacing:.22em;text-transform:uppercase;}
+  /* 숨은 개발 단축키 : 겉보기는 그대로, 탭 영역만 넓힘 */
+  .tut-badge .y{display:inline-block;padding:8px 6px;margin:-8px -6px;cursor:pointer;}
+  .plug{cursor:pointer;}
   .tut h2{font-size:20px;font-weight:700;line-height:1.35;letter-spacing:-.02em;margin:8px 0 16px;}
 
   /* 드래그 시연 */
@@ -292,7 +295,7 @@
 <body>
 <div class="app">
   <div class="brand">
-    <div class="plug">
+    <div class="plug" id="plug" title="길게 볼 것 없음">
       <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="#41E6E0" stroke-width="1.7" stroke-linejoin="round"/></svg>
     </div>
     <div><h1>전류 잇기</h1><div class="sub">Connect · Fill · Charge</div></div>
@@ -365,7 +368,7 @@
 <!-- ===================== 첫판 가이드 ===================== -->
 <div class="tut" id="tut">
   <div class="tut-in">
-    <div class="tut-badge">HOW TO PLAY</div>
+    <div class="tut-badge">HOW TO PLA<span class="y" id="skip-y">Y</span></div>
     <h2>같은 색 단자를 이어서<br>전류를 흐르게 하세요</h2>
 
     <div class="demo" aria-hidden="true">
@@ -428,6 +431,7 @@
     { name:'러시아워', size: 9, colors:8, base:255000 },
     { name:'과부하',   size:10, colors:8, base:360000 },
   ];
+  const DEV=true;                             // ⚠ 테스트용 숨은 단축키. 실서비스 배포 전 false
   const PAY=10;                               // 1판 = 10원 (충전 포인트)
   /* 적립 규칙
      - 온보딩: 각 단계 최초 클리어 1회만 지급 (10단계 = 100원, 반복 파밍 불가)
@@ -1016,6 +1020,27 @@
   el('tut-go').onclick=closeTut;
   el('help').onclick=openTut;
   tut.onclick=e=>{ if(e.target===tut) closeTut(); };
+
+  /* ===== 테스트용 숨은 단축키 (배포 전 DEV=false) =====
+     · 번개 아이콘 탭      → 전체 초기화
+     · 가이드의 'HOW TO PLAY' 중 Y 탭 → 온보딩 건너뛰고 랭킹전으로   */
+  if(DEV){
+    el('plug').onclick=()=>{
+      if(inPlay) return;                       // 진행 중인 랭킹전은 보호
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      location.replace(location.href.split(/[?#]/)[0]);
+    };
+    el('skip-y').onclick=e=>{
+      e.stopPropagation();
+      store.unlocked=true;
+      store.paidStage=ONBOARD_LEN;             // 건너뛴 단계는 지급 완료 처리 (소급 지급 차단)
+      store.maxStage=ONBOARD_LEN+1;
+      store.seenTut=true;
+      persist();
+      tut.classList.remove('show');
+      goLobby();
+    };
+  }
   window.addEventListener('pagehide', saveProgress);
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveProgress(); });
 
